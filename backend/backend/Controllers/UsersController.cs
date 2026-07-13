@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,52 @@ public class UsersController : ControllerBase
             .ToListAsync();
 
         return Ok(users);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateUserDto dto)
+    {
+        var fullName = dto.FullName?.Trim();
+        var email = dto.Email?.Trim();
+        var password = dto.Password?.Trim();
+        var role = dto.Role?.Trim();
+
+        if (string.IsNullOrWhiteSpace(fullName))
+            return BadRequest(new { message = "Magaca user-ka waa qasab" });
+
+        if (string.IsNullOrWhiteSpace(email))
+            return BadRequest(new { message = "Email-ka user-ka waa qasab" });
+
+        if (string.IsNullOrWhiteSpace(password))
+            return BadRequest(new { message = "Password-ka waa qasab" });
+
+        if (role != "Admin" && role != "User")
+            return BadRequest(new { message = "Role-ku waa inuu noqdaa Admin ama User" });
+
+        var emailExists = await _context.Users.AnyAsync(item => item.Email != null && item.Email.ToLower() == email.ToLower());
+        if (emailExists)
+            return BadRequest(new { message = "Email-kan horay ayaa loo diiwaangeliyay" });
+
+        var user = new Users
+        {
+            FullName = fullName,
+            Email = email,
+            PasswordHash = password,
+            Role = role,
+            CreatedDate = DateTime.UtcNow
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            user.Id,
+            user.FullName,
+            user.Email,
+            user.Role,
+            user.CreatedDate
+        });
     }
 
     [HttpDelete("{id}")]
@@ -126,5 +173,13 @@ public class UpdateUserDto
 {
     public string? FullName { get; set; }
     public string? Email { get; set; }
+    public string? Role { get; set; }
+}
+
+public class CreateUserDto
+{
+    public string? FullName { get; set; }
+    public string? Email { get; set; }
+    public string? Password { get; set; }
     public string? Role { get; set; }
 }

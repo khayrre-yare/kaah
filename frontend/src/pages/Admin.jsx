@@ -16,6 +16,7 @@ import Skeleton from '../components/ui/Skeleton';
 import { useToast } from '../context/ToastContext';
 
 const emptyBook = { title: '', author: '', price: '', quantity: '', categoryId: '' };
+const emptyUser = { fullName: '', email: '', password: '', role: 'User' };
 
 function money(value) {
   return `$${Number(value || 0).toFixed(2)}`;
@@ -173,7 +174,7 @@ export default function Admin() {
 
   const openCreate = (type) => {
     setModal({ type, mode: 'create' });
-    setForm(type === 'book' ? { ...emptyBook, categoryId: firstCategoryId } : { name: '' });
+    setForm(type === 'book' ? { ...emptyBook, categoryId: firstCategoryId } : type === 'user' ? emptyUser : { name: '' });
   };
 
   const handleAddBook = () => {
@@ -234,8 +235,10 @@ export default function Admin() {
       } else {
         if (!normalizeText(form.fullName)) throw new Error('Full name is required.');
         if (!normalizeText(form.email)) throw new Error('Email is required.');
+        if (modal.mode === 'create' && !normalizeText(form.password)) throw new Error('Password is required.');
         if (form.role !== 'Admin' && form.role !== 'User') throw new Error('Role must be Admin or User.');
-        await usersApi.update(modal.id, form);
+        if (modal.mode === 'create') await usersApi.create(form);
+        else await usersApi.update(modal.id, form);
       }
 
       showToast(modal.mode === 'create' ? 'Created successfully.' : 'Updated successfully.');
@@ -297,7 +300,7 @@ export default function Admin() {
   const modalTitle = modal?.type === 'book'
     ? (modal?.mode === 'create' ? 'Add new book' : 'Edit book')
     : modal?.type === 'user'
-      ? 'Manage member'
+      ? (modal?.mode === 'create' ? 'Add member' : 'Manage member')
       : (modal?.mode === 'create' ? 'Add category' : 'Edit category');
 
   return (
@@ -474,64 +477,72 @@ export default function Admin() {
                   <h2 className="text-lg font-black text-slate-950">Members management</h2>
                   <p className="mt-1 text-sm font-semibold text-slate-500">Edit users, change roles, create admins, and monitor borrowed or purchased books.</p>
                 </div>
-                <Badge variant="purple">{memberRows.length} members</Badge>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <Badge variant="purple">{memberRows.length} members</Badge>
+                  <Button variant="accent" onClick={() => openCreate('user')}>
+                    <Plus size={17} /> Add Member
+                  </Button>
+                </div>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1080px] text-left">
-                <thead className="bg-white text-xs font-black uppercase tracking-[0.18em] text-slate-500">
-                  <tr>
-                    <th className="px-6 py-4">User</th>
-                    <th className="px-6 py-4">Role</th>
-                    <th className="px-6 py-4">Borrowed now</th>
-                    <th className="px-6 py-4">Bought</th>
-                    <th className="px-6 py-4">Total spent</th>
-                    <th className="px-6 py-4">Joined</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {loading ? <tr><td colSpan="7" className="px-6 py-8"><Skeleton className="h-16" /></td></tr> : memberRows.length ? memberRows.map((member) => (
-                    <tr key={member.id || member.Id} className="align-top transition hover:bg-slate-50/70">
-                      <td className="px-6 py-5">
-                        <div className="flex items-start gap-3">
-                          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-sm font-black text-white shadow-lg shadow-indigo-600/20">
-                            {(member.fullName || member.FullName || 'User').split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'U'}
-                          </span>
-                          <div className="min-w-0">
-                            <p className="font-black text-slate-950">{member.fullName || member.FullName || 'User'}</p>
-                            <p className="mt-1 text-sm font-semibold text-slate-500">{member.email || member.Email}</p>
-                            <p className="mt-1 text-xs font-bold text-slate-400">ID #{member.id || member.Id}</p>
+            <div className="p-5">
+              {loading ? (
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {[1, 2, 3].map((item) => <Skeleton key={item} className="h-72" />)}
+                </div>
+              ) : memberRows.length ? (
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {memberRows.map((member) => {
+                    const name = member.fullName || member.FullName || 'User';
+                    const role = member.role || member.Role || 'User';
+                    return (
+                      <article key={member.id || member.Id} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-950/10">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex min-w-0 items-start gap-3">
+                            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-sm font-black text-white shadow-lg shadow-indigo-600/20">
+                              {name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'U'}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate font-black text-slate-950">{name}</p>
+                              <p className="mt-1 truncate text-sm font-semibold text-slate-500">{member.email || member.Email}</p>
+                              <p className="mt-1 text-xs font-bold text-slate-400">Joined {formatDate(member.createdDate || member.CreatedDate)}</p>
+                            </div>
+                          </div>
+                          <Badge variant={role === 'Admin' ? 'purple' : 'indigo'}>{role}</Badge>
+                        </div>
+
+                        <div className="mt-5 grid grid-cols-3 gap-2 text-center">
+                          <div className="rounded-2xl bg-indigo-50 px-3 py-3">
+                            <p className="text-xl font-black text-indigo-700">{member.activeBooks.length}</p>
+                            <p className="text-[11px] font-bold text-indigo-500">Borrowed</p>
+                          </div>
+                          <div className="rounded-2xl bg-amber-50 px-3 py-3">
+                            <p className="text-xl font-black text-amber-700">{member.pendingBooks.length + member.pendingOrders.length}</p>
+                            <p className="text-[11px] font-bold text-amber-600">Pending</p>
+                          </div>
+                          <div className="rounded-2xl bg-emerald-50 px-3 py-3">
+                            <p className="text-xl font-black text-emerald-700">{member.boughtCopies}</p>
+                            <p className="text-[11px] font-bold text-emerald-600">Bought</p>
                           </div>
                         </div>
-                        {member.userBorrows.length > 0 && (
-                          <div className="mt-3 flex max-w-md flex-wrap gap-2">
-                            {member.userBorrows.slice(0, 4).map((borrow) => (
-                              <Badge key={borrow.id} variant={borrow.status === 'Returned' ? 'success' : 'warning'}>
-                                {borrow.bookTitle || `Book #${borrow.bookId}`}
-                              </Badge>
-                            ))}
+
+                        <div className="mt-4 rounded-2xl bg-slate-50 p-4">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Total spent</p>
+                            <p className="font-black text-slate-950">{money(member.totalSpent)}</p>
                           </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-5"><Badge variant={(member.role || member.Role) === 'Admin' ? 'purple' : 'indigo'}>{member.role || member.Role || 'User'}</Badge></td>
-                      <td className="px-6 py-5">
-                        <p className="text-lg font-black text-indigo-700">{member.activeBooks.length}</p>
-                        <p className="text-xs font-bold text-slate-400">{member.pendingBooks.length} pending · {member.returnedCount} returned</p>
-                      </td>
-                      <td className="px-6 py-5">
-                        <p className="text-lg font-black text-emerald-700">{member.boughtCopies}</p>
-                        <p className="text-xs font-bold text-slate-400">{member.pendingOrders.length} pending orders</p>
-                        {member.boughtBooks.length > 0 && (
-                          <p className="mt-1 line-clamp-2 max-w-xs text-xs font-semibold text-slate-500">
-                            {member.boughtBooks.map((item) => `${item.bookTitle} x${item.quantity}`).join(', ')}
-                          </p>
-                        )}
-                      </td>
-                      <td className="px-6 py-5 font-black text-slate-950">{money(member.totalSpent)}</td>
-                      <td className="px-6 py-5 text-sm font-semibold text-slate-500">{formatDate(member.createdDate || member.CreatedDate)}</td>
-                      <td className="px-6 py-5">
-                        <div className="flex justify-end gap-2">
+                          {member.userBorrows.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {member.userBorrows.slice(0, 3).map((borrow) => (
+                                <Badge key={borrow.id} variant={borrow.status === 'Returned' ? 'success' : 'warning'}>
+                                  {borrow.bookTitle || `Book #${borrow.bookId}`}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-2 gap-2">
                           <Button variant="secondary" size="sm" onClick={() => openEdit('user', member)}>
                             <Pencil size={15} /> Edit
                           </Button>
@@ -539,11 +550,13 @@ export default function Admin() {
                             <Trash2 size={15} /> Delete
                           </Button>
                         </div>
-                      </td>
-                    </tr>
-                  )) : <tr><td colSpan="7" className="px-6 py-10"><EmptyState icon={UsersRound} title="No users found" description="Registered users will appear here." /></td></tr>}
-                </tbody>
-              </table>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState icon={UsersRound} title="No users found" description="Registered users will appear here." actionLabel="Add Member" onAction={() => openCreate('user')} />
+              )}
             </div>
           </Card>
         )}
@@ -584,6 +597,9 @@ export default function Admin() {
             <>
               <Input label="Full name" required value={form.fullName || ''} onChange={updateField('fullName')} placeholder="Member name" />
               <Input label="Email" type="email" required value={form.email || ''} onChange={updateField('email')} placeholder="member@example.com" />
+              {modal?.mode === 'create' && (
+                <Input label="Password" type="password" required value={form.password || ''} onChange={updateField('password')} placeholder="Temporary password" />
+              )}
               <div className="block space-y-2">
                 <span className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Role</span>
                 <Select required value={form.role || 'User'} onChange={updateField('role')}>

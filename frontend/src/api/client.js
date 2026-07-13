@@ -194,6 +194,15 @@ export const ordersApi = {
 
 export const usersApi = {
   getAll: () => apiRequest('/Users'),
+  create: (user) => apiRequest('/Users', {
+    method: 'POST',
+    body: JSON.stringify({
+      FullName: user.fullName,
+      Email: user.email,
+      Password: user.password,
+      Role: user.role,
+    }),
+  }),
   update: (id, user) => apiRequest(`/Users/${id}`, {
     method: 'PUT',
     body: JSON.stringify({
