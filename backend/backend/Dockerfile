@@ -1,10 +1,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY backend.csproj ./
+COPY backend/backend/backend.csproj ./
 RUN dotnet restore backend.csproj
 
-COPY . ./
+COPY backend/backend/ ./
 RUN dotnet publish backend.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
