@@ -10,7 +10,6 @@ import ConfirmDialog from '../components/ui/ConfirmDialog';
 import EmptyState from '../components/ui/EmptyState';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
-import PageHeader from '../components/ui/PageHeader';
 import Select from '../components/ui/Select';
 import Skeleton from '../components/ui/Skeleton';
 import { useToast } from '../context/ToastContext';
@@ -42,16 +41,17 @@ function AdminMetric({ icon: Icon, label, value, detail, tone = 'indigo' }) {
   };
 
   return (
-    <Card className="p-5 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-950/10">
-      <div className="flex items-start justify-between gap-4">
-        <span className={`grid h-12 w-12 place-items-center rounded-2xl ring-1 ${tones[tone] || tones.indigo}`}>
+    <Card className="p-5 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-950/10">
+      <div className="flex items-start gap-4">
+        <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ring-1 ${tones[tone] || tones.indigo}`}>
           <Icon size={22} />
         </span>
-        <Badge variant="default">Live</Badge>
+        <div className="min-w-0">
+          <p className="text-2xl font-black tracking-tight text-slate-950">{value}</p>
+          <p className="mt-1 text-sm font-black text-slate-700">{label}</p>
+          {detail && <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{detail}</p>}
+        </div>
       </div>
-      <p className="mt-5 text-3xl font-black tracking-tight text-slate-950">{value}</p>
-      <p className="mt-1 text-sm font-black text-slate-700">{label}</p>
-      {detail && <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{detail}</p>}
     </Card>
   );
 }
@@ -305,60 +305,46 @@ export default function Admin() {
 
   return (
     <DashboardShell title="Admin Panel">
-      <PageHeader
-        eyebrow="Admin command center"
-        title="Library operations dashboard"
-        description="Approve requests, monitor inventory, track members, and keep the library workflow organized from one place."
-      >
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Button variant="secondary" onClick={() => openCreate('category')}><Plus size={18} /> Add Category</Button>
-          <Button variant="accent" onClick={handleAddBook}><BookPlus size={18} /> Add Book</Button>
-        </div>
-      </PageHeader>
-
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-8 grid gap-6 xl:grid-cols-[1.05fr_.95fr]">
-          <Card className="overflow-hidden border-indigo-200 shadow-xl shadow-indigo-950/10">
-            <div className="relative overflow-hidden bg-slate-950 p-6 text-white">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,.42),transparent_26rem),radial-gradient(circle_at_80%_10%,rgba(147,51,234,.32),transparent_22rem)]" />
-              <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-                <div>
-                  <Badge className="border-white/15 bg-white/10 text-white">
-                    <Activity size={13} /> Live operations
-                  </Badge>
-                  <h2 className="mt-5 max-w-xl text-3xl font-black tracking-tight sm:text-4xl">Admin dashboard</h2>
-                  <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-slate-300">
-                    Requests, stock, members, borrowed books, and sales are organized here so approval decisions are clear.
-                  </p>
-                </div>
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur">
-                    <p className="text-2xl font-black">{approvalsTotal}</p>
-                    <p className="text-[11px] font-bold uppercase tracking-wide text-white/65">Pending</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur">
-                    <p className="text-2xl font-black">{stats.activeBorrows}</p>
-                    <p className="text-[11px] font-bold uppercase tracking-wide text-white/65">Borrowed</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur">
-                    <p className="text-2xl font-black">{stats.stock}</p>
-                    <p className="text-[11px] font-bold uppercase tracking-wide text-white/65">Copies</p>
-                  </div>
-                </div>
-              </div>
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-col gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="indigo"><Activity size={13} /> Admin</Badge>
+              <Badge variant={approvalsTotal ? 'warning' : 'success'}>{approvalsTotal} pending</Badge>
             </div>
-            <div className="grid gap-3 bg-white p-4 sm:grid-cols-3">
-              <button onClick={() => setTab('books')} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
-                <BookOpen size={20} />
+            <h1 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Library operations</h1>
+            <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-slate-600">
+              Manage approvals, books, categories, members, roles, stock, and sales from one clean workspace.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3 lg:w-auto">
+            <Button variant="secondary" onClick={() => openCreate('category')}><Plus size={18} /> Category</Button>
+            <Button variant="secondary" onClick={() => openCreate('user')}><UsersRound size={18} /> Member</Button>
+            <Button variant="accent" onClick={handleAddBook}><BookPlus size={18} /> Book</Button>
+          </div>
+        </div>
+
+        <div className="mb-6 grid gap-6 xl:grid-cols-[1fr_420px]">
+          <Card className="p-5 shadow-lg shadow-slate-950/5">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h2 className="text-lg font-black text-slate-950">Operations snapshot</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-500">Quick actions for the most common admin work.</p>
+              </div>
+              <Button variant="ghost" onClick={loadData}><RefreshCw size={17} /> Refresh</Button>
+            </div>
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <button onClick={() => setTab('books')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><BookOpen size={20} /></span>
                 <span><span className="block text-sm font-black">Inventory</span><span className="block text-xs font-semibold opacity-75">Books and stock</span></span>
               </button>
-              <button onClick={() => setTab('members')} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
-                <UsersRound size={20} />
-                <span><span className="block text-sm font-black">Members</span><span className="block text-xs font-semibold opacity-75">Activity and books</span></span>
+              <button onClick={() => setTab('members')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><UsersRound size={20} /></span>
+                <span><span className="block text-sm font-black">Members</span><span className="block text-xs font-semibold opacity-75">Roles and users</span></span>
               </button>
-              <button onClick={loadData} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
-                <RefreshCw size={20} />
-                <span><span className="block text-sm font-black">Refresh</span><span className="block text-xs font-semibold opacity-75">Sync latest data</span></span>
+              <button onClick={() => setTab('categories')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><FolderOpen size={20} /></span>
+                <span><span className="block text-sm font-black">Categories</span><span className="block text-xs font-semibold opacity-75">Catalog groups</span></span>
               </button>
             </div>
           </Card>
@@ -409,7 +395,7 @@ export default function Admin() {
           </Card>
         </div>
 
-        <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+        <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {adminMetrics.map((item) => <AdminMetric key={item.label} {...item} />)}
         </div>
 
