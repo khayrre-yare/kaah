@@ -1,0 +1,81 @@
+@backend_HostAddress = http://localhost:5294
+@token = YOUR_JWT_TOKEN_HERE
+
+### Health check
+GET {{backend_HostAddress}}/
+
+### Register
+POST {{backend_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Test User",
+  "email": "test@example.com",
+  "password": "123456"
+}
+
+### Login
+POST {{backend_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+
+### Get all books
+GET {{backend_HostAddress}}/api/books
+
+### Get all categories
+GET {{backend_HostAddress}}/api/categories
+
+### Create category (Admin)
+POST {{backend_HostAddress}}/api/categories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Fiction"
+}
+
+### Create book (Admin)
+POST {{backend_HostAddress}}/api/books
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Sample Book",
+  "author": "John Doe",
+  "price": 19.99,
+  "quantity": 10,
+  "categoryId": 1
+}
+
+### Borrow a book
+POST {{backend_HostAddress}}/api/borrows
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "bookId": 1,
+  "returnDate": "2026-07-15T00:00:00Z"
+}
+
+### Return a book
+PUT {{backend_HostAddress}}/api/borrows/1/return
+Authorization: Bearer {{token}}
+
+### Create order
+POST {{backend_HostAddress}}/api/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "items": [
+    { "bookId": 1, "quantity": 2 }
+  ]
+}
+
+### Get my orders
+GET {{backend_HostAddress}}/api/orders
+Authorization: Bearer {{token}}

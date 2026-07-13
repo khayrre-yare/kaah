@@ -1,0 +1,26 @@
+{
+  "name": "kaah3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "npm install --prefix frontend",
+    "dev": "concurrently -n BACKEND,FRONTEND \"dotnet run --project backend/backend/backend.csproj\" \"npm run dev --prefix frontend\"",
+    "build": "npm run build --prefix frontend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khayrre-yare/kaah1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/khayrre-yare/kaah1/issues"
+  },
+  "homepage": "https://github.com/khayrre-yare/kaah1#readme",
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
