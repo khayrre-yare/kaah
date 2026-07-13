@@ -194,5 +194,13 @@ export const ordersApi = {
 
 export const usersApi = {
   getAll: () => apiRequest('/Users'),
+  update: (id, user) => apiRequest(`/Users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      FullName: user.fullName,
+      Email: user.email,
+      Role: user.role,
+    }),
+  }),
   delete: (id) => apiRequest(`/Users/${id}`, { method: 'DELETE' }),
 };

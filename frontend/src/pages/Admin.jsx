@@ -188,16 +188,29 @@ export default function Admin() {
   };
 
   const openEdit = (type, item) => {
-    setModal({ type, mode: 'edit', id: item.id });
-    setForm(type === 'book'
-      ? {
+    const id = item.id || item.Id;
+    setModal({ type, mode: 'edit', id });
+    if (type === 'book') {
+      setForm({
         title: item.title || '',
         author: item.author || '',
         price: item.price || '',
         quantity: item.quantity || '',
         categoryId: item.categoryId || firstCategoryId,
-      }
-      : { name: item.name || '' });
+      });
+      return;
+    }
+
+    if (type === 'user') {
+      setForm({
+        fullName: item.fullName || item.FullName || '',
+        email: item.email || item.Email || '',
+        role: item.role || item.Role || 'User',
+      });
+      return;
+    }
+
+    setForm({ name: item.name || '' });
   };
 
   const updateField = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
@@ -214,10 +227,15 @@ export default function Admin() {
 
         if (modal.mode === 'create') await booksApi.create(form);
         else await booksApi.update(modal.id, form);
-      } else {
+      } else if (modal.type === 'category') {
         if (!normalizeText(form.name)) throw new Error('Category name is required.');
         if (modal.mode === 'create') await categoriesApi.create(form);
         else await categoriesApi.update(modal.id, form);
+      } else {
+        if (!normalizeText(form.fullName)) throw new Error('Full name is required.');
+        if (!normalizeText(form.email)) throw new Error('Email is required.');
+        if (form.role !== 'Admin' && form.role !== 'User') throw new Error('Role must be Admin or User.');
+        await usersApi.update(modal.id, form);
       }
 
       showToast(modal.mode === 'create' ? 'Created successfully.' : 'Updated successfully.');
@@ -278,7 +296,9 @@ export default function Admin() {
 
   const modalTitle = modal?.type === 'book'
     ? (modal?.mode === 'create' ? 'Add new book' : 'Edit book')
-    : (modal?.mode === 'create' ? 'Add category' : 'Edit category');
+    : modal?.type === 'user'
+      ? 'Manage member'
+      : (modal?.mode === 'create' ? 'Add category' : 'Edit category');
 
   return (
     <DashboardShell title="Admin Panel">
@@ -447,10 +467,15 @@ export default function Admin() {
             )) : <div className="sm:col-span-2 lg:col-span-3"><EmptyState icon={FolderOpen} title="No categories yet" description="Add a category before saving books." actionLabel="Add Category" onAction={() => openCreate('category')} /></div>}
           </div>
         ) : (
-          <Card className="overflow-hidden">
-            <div className="border-b border-slate-100 bg-slate-50 px-6 py-5">
-              <h2 className="text-lg font-black text-slate-950">Members activity</h2>
-              <p className="mt-1 text-sm font-semibold text-slate-500">Qof kasta ka arag buugaagta uu amaahday, kuwa uu celiyay, iyo kuwa uu gatay.</p>
+          <Card className="overflow-hidden border-indigo-100 shadow-xl shadow-indigo-950/5">
+            <div className="border-b border-slate-100 bg-gradient-to-r from-indigo-50 via-white to-purple-50 px-6 py-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-black text-slate-950">Members management</h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">Edit users, change roles, create admins, and monitor borrowed or purchased books.</p>
+                </div>
+                <Badge variant="purple">{memberRows.length} members</Badge>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1080px] text-left">
@@ -469,8 +494,16 @@ export default function Admin() {
                   {loading ? <tr><td colSpan="7" className="px-6 py-8"><Skeleton className="h-16" /></td></tr> : memberRows.length ? memberRows.map((member) => (
                     <tr key={member.id || member.Id} className="align-top transition hover:bg-slate-50/70">
                       <td className="px-6 py-5">
-                        <p className="font-black text-slate-950">{member.fullName || member.FullName || 'User'}</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-500">{member.email || member.Email}</p>
+                        <div className="flex items-start gap-3">
+                          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-sm font-black text-white shadow-lg shadow-indigo-600/20">
+                            {(member.fullName || member.FullName || 'User').split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'U'}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="font-black text-slate-950">{member.fullName || member.FullName || 'User'}</p>
+                            <p className="mt-1 text-sm font-semibold text-slate-500">{member.email || member.Email}</p>
+                            <p className="mt-1 text-xs font-bold text-slate-400">ID #{member.id || member.Id}</p>
+                          </div>
+                        </div>
                         {member.userBorrows.length > 0 && (
                           <div className="mt-3 flex max-w-md flex-wrap gap-2">
                             {member.userBorrows.slice(0, 4).map((borrow) => (
@@ -498,7 +531,10 @@ export default function Admin() {
                       <td className="px-6 py-5 font-black text-slate-950">{money(member.totalSpent)}</td>
                       <td className="px-6 py-5 text-sm font-semibold text-slate-500">{formatDate(member.createdDate || member.CreatedDate)}</td>
                       <td className="px-6 py-5">
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="secondary" size="sm" onClick={() => openEdit('user', member)}>
+                            <Pencil size={15} /> Edit
+                          </Button>
                           <Button variant="danger" size="sm" onClick={() => remove('user', member.id || member.Id)}>
                             <Trash2 size={15} /> Delete
                           </Button>
@@ -513,7 +549,12 @@ export default function Admin() {
         )}
       </section>
 
-      <Modal isOpen={Boolean(modal)} onClose={() => setModal(null)} title={modalTitle} description={modal?.type === 'book' ? 'Required fields: Title, Author, Price, Quantity, CategoryId.' : 'Create a category that books can be attached to.'}>
+      <Modal
+        isOpen={Boolean(modal)}
+        onClose={() => setModal(null)}
+        title={modalTitle}
+        description={modal?.type === 'book' ? 'Required fields: Title, Author, Price, Quantity, CategoryId.' : modal?.type === 'user' ? 'Update member information and choose whether this account is User or Admin.' : 'Create a category that books can be attached to.'}
+      >
         <form onSubmit={submit} className="space-y-5">
           {modal?.type === 'book' ? (
             <>
@@ -537,8 +578,23 @@ export default function Admin() {
               </div>
               {!hasCategories && <Button variant="secondary" className="w-full" onClick={() => { setModal({ type: 'category', mode: 'create', thenBook: true }); setForm({ name: '' }); }}>Create category first</Button>}
             </>
-          ) : (
+          ) : modal?.type === 'category' ? (
             <Input label="Category name" required value={form.name || ''} onChange={updateField('name')} placeholder="Example: Programming" />
+          ) : (
+            <>
+              <Input label="Full name" required value={form.fullName || ''} onChange={updateField('fullName')} placeholder="Member name" />
+              <Input label="Email" type="email" required value={form.email || ''} onChange={updateField('email')} placeholder="member@example.com" />
+              <div className="block space-y-2">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Role</span>
+                <Select required value={form.role || 'User'} onChange={updateField('role')}>
+                  <option value="User">User</option>
+                  <option value="Admin">Admin</option>
+                </Select>
+              </div>
+              <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-sm font-semibold leading-7 text-indigo-950">
+                Role-ka Admin wuxuu qofkan siinayaa access buuxa: books, members, approvals, delete, iyo reports.
+              </div>
+            </>
           )}
           <Button type="submit" variant="accent" loading={submitting} disabled={modal?.type === 'book' && !hasCategories} className="w-full">Save changes</Button>
         </form>

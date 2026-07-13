@@ -71,4 +71,60 @@ public class UsersController : ControllerBase
 
         return Ok(new { message = "User-ka iyo records-kiisa waa la tirtiray" });
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, UpdateUserDto dto)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null)
+            return NotFound(new { message = "User-ka lama helin" });
+
+        var fullName = dto.FullName?.Trim();
+        var email = dto.Email?.Trim();
+        var role = dto.Role?.Trim();
+
+        if (string.IsNullOrWhiteSpace(fullName))
+            return BadRequest(new { message = "Magaca user-ka waa qasab" });
+
+        if (string.IsNullOrWhiteSpace(email))
+            return BadRequest(new { message = "Email-ka user-ka waa qasab" });
+
+        if (role != "Admin" && role != "User")
+            return BadRequest(new { message = "Role-ku waa inuu noqdaa Admin ama User" });
+
+        var emailExists = await _context.Users
+            .AnyAsync(item => item.Id != id && item.Email != null && item.Email.ToLower() == email.ToLower());
+
+        if (emailExists)
+            return BadRequest(new { message = "Email-kan user kale ayaa isticmaala" });
+
+        if (user.Role == "Admin" && role != "Admin")
+        {
+            var adminCount = await _context.Users.CountAsync(item => item.Role == "Admin");
+            if (adminCount <= 1)
+                return BadRequest(new { message = "Admin-ka ugu dambeeya lama beddeli karo User" });
+        }
+
+        user.FullName = fullName;
+        user.Email = email;
+        user.Role = role;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            user.Id,
+            user.FullName,
+            user.Email,
+            user.Role,
+            user.CreatedDate
+        });
+    }
+}
+
+public class UpdateUserDto
+{
+    public string? FullName { get; set; }
+    public string? Email { get; set; }
+    public string? Role { get; set; }
 }
