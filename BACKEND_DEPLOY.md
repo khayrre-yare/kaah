@@ -15,6 +15,7 @@ Set these in Railway Variables:
 ASPNETCORE_ENVIRONMENT=Production
 ConnectionStrings__DefaultConnection=Host=...;Database=...;Username=...;Password=...;SSL Mode=Require;Trust Server Certificate=true
 Jwt__Key=your-long-secret-key
+AllowedOrigins=https://your-vercel-domain.vercel.app
 ```
 
 ## Railway steps
