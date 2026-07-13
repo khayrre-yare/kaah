@@ -194,4 +194,5 @@ export const ordersApi = {
 
 export const usersApi = {
   getAll: () => apiRequest('/Users'),
+  delete: (id) => apiRequest(`/Users/${id}`, { method: 'DELETE' }),
 };

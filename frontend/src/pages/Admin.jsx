@@ -264,7 +264,8 @@ export default function Admin() {
     setDeleting(true);
     try {
       if (pendingDelete.type === 'book') await booksApi.delete(pendingDelete.id);
-      else await categoriesApi.delete(pendingDelete.id);
+      else if (pendingDelete.type === 'category') await categoriesApi.delete(pendingDelete.id);
+      else await usersApi.delete(pendingDelete.id);
       showToast('Deleted successfully.');
       setPendingDelete(null);
       await loadData();
@@ -452,7 +453,7 @@ export default function Admin() {
               <p className="mt-1 text-sm font-semibold text-slate-500">Qof kasta ka arag buugaagta uu amaahday, kuwa uu celiyay, iyo kuwa uu gatay.</p>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[980px] text-left">
+              <table className="w-full min-w-[1080px] text-left">
                 <thead className="bg-white text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                   <tr>
                     <th className="px-6 py-4">User</th>
@@ -461,10 +462,11 @@ export default function Admin() {
                     <th className="px-6 py-4">Bought</th>
                     <th className="px-6 py-4">Total spent</th>
                     <th className="px-6 py-4">Joined</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {loading ? <tr><td colSpan="6" className="px-6 py-8"><Skeleton className="h-16" /></td></tr> : memberRows.length ? memberRows.map((member) => (
+                  {loading ? <tr><td colSpan="7" className="px-6 py-8"><Skeleton className="h-16" /></td></tr> : memberRows.length ? memberRows.map((member) => (
                     <tr key={member.id || member.Id} className="align-top transition hover:bg-slate-50/70">
                       <td className="px-6 py-5">
                         <p className="font-black text-slate-950">{member.fullName || member.FullName || 'User'}</p>
@@ -495,8 +497,15 @@ export default function Admin() {
                       </td>
                       <td className="px-6 py-5 font-black text-slate-950">{money(member.totalSpent)}</td>
                       <td className="px-6 py-5 text-sm font-semibold text-slate-500">{formatDate(member.createdDate || member.CreatedDate)}</td>
+                      <td className="px-6 py-5">
+                        <div className="flex justify-end">
+                          <Button variant="danger" size="sm" onClick={() => remove('user', member.id || member.Id)}>
+                            <Trash2 size={15} /> Delete
+                          </Button>
+                        </div>
+                      </td>
                     </tr>
-                  )) : <tr><td colSpan="6" className="px-6 py-10"><EmptyState icon={UsersRound} title="No users found" description="Registered users will appear here." /></td></tr>}
+                  )) : <tr><td colSpan="7" className="px-6 py-10"><EmptyState icon={UsersRound} title="No users found" description="Registered users will appear here." /></td></tr>}
                 </tbody>
               </table>
             </div>
@@ -536,8 +545,8 @@ export default function Admin() {
       </Modal>
       <ConfirmDialog
         open={Boolean(pendingDelete)}
-        title="Delete this item?"
-        description="This action will remove the selected record."
+        title={pendingDelete?.type === 'user' ? 'Delete this user?' : 'Delete this item?'}
+        description={pendingDelete?.type === 'user' ? 'This will remove the user account and related records. Active borrowed books will be returned to stock.' : 'This action will remove the selected record.'}
         confirmLabel="Delete"
         danger
         loading={deleting}
