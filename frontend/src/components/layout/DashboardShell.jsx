@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import {
   BookOpen,
+  FolderOpen,
   LibraryBig,
   LogOut,
   Menu,
@@ -10,6 +11,7 @@ import {
   PanelLeftOpen,
   ShieldCheck,
   ShoppingBag,
+  UsersRound,
   X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -32,10 +34,13 @@ export default function DashboardShell({ children }) {
   const role = user?.role || 'Member';
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LibraryBig },
-    { to: isAdmin ? '/books' : '/my-books', label: isAdmin ? 'Books' : 'My Books', icon: BookOpen },
+    { to: isAdmin ? '/admin/books' : '/my-books', label: isAdmin ? 'Books' : 'My Books', icon: BookOpen },
     ...(!isAdmin ? [{ to: '/contact', label: 'Nala Soo Xiriir', icon: MessageSquare }] : []),
+    ...(isAdmin ? [{ to: '/admin/approvals', label: 'Approvals', icon: ShieldCheck }] : []),
+    ...(isAdmin ? [{ to: '/admin/messages', label: 'Messages', icon: MessageSquare }] : []),
+    ...(isAdmin ? [{ to: '/admin/members', label: 'Members', icon: UsersRound }] : []),
+    ...(isAdmin ? [{ to: '/admin/categories', label: 'Categories', icon: FolderOpen }] : []),
     { to: '/cart', label: 'Cart', icon: ShoppingBag, badge: count },
-    ...(isAdmin ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck }] : []),
   ];
 
   const sidebar = (

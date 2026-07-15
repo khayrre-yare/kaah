@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, BookOpen, BookPlus, Boxes, CheckCircle2, CircleAlert, FolderOpen, MessageSquare, Pencil, Plus, RefreshCw, Send, ShoppingBag, Trash2, UserRoundCheck, UsersRound, WalletCards } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { BookOpen, CheckCircle2, CircleAlert, FolderOpen, MessageSquare, Pencil, Plus, RefreshCw, Send, Trash2, UsersRound } from 'lucide-react';
 import { booksApi, borrowsApi, categoriesApi, contactMessagesApi, ordersApi, usersApi } from '../api/client';
 import DashboardShell from '../components/layout/DashboardShell';
 import Alert from '../components/ui/Alert';
@@ -30,32 +31,6 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date(value));
 }
 
-function AdminMetric({ icon: Icon, label, value, detail, tone = 'indigo' }) {
-  const tones = {
-    indigo: 'bg-indigo-50 text-indigo-700 ring-indigo-100',
-    blue: 'bg-blue-50 text-blue-700 ring-blue-100',
-    amber: 'bg-amber-50 text-amber-700 ring-amber-100',
-    purple: 'bg-purple-50 text-purple-700 ring-purple-100',
-    emerald: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
-    slate: 'bg-slate-100 text-slate-700 ring-slate-200',
-  };
-
-  return (
-    <Card className="p-5 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-950/10">
-      <div className="flex items-start gap-4">
-        <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ring-1 ${tones[tone] || tones.indigo}`}>
-          <Icon size={22} />
-        </span>
-        <div className="min-w-0">
-          <p className="text-2xl font-black tracking-tight text-slate-950">{value}</p>
-          <p className="mt-1 text-sm font-black text-slate-700">{label}</p>
-          {detail && <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{detail}</p>}
-        </div>
-      </div>
-    </Card>
-  );
-}
-
 function ApprovalItem({ kind, title, user, meta, detail, approveLoading, rejectLoading, onApprove, onReject }) {
   const isBorrow = kind === 'Borrow';
 
@@ -79,7 +54,9 @@ function ApprovalItem({ kind, title, user, meta, detail, approveLoading, rejectL
 }
 
 export default function Admin() {
-  const [tab, setTab] = useState('books');
+  const navigate = useNavigate();
+  const { section } = useParams();
+  const page = ['approvals', 'books', 'categories', 'members', 'messages'].includes(section) ? section : 'books';
   const [books, setBooks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
@@ -127,31 +104,10 @@ export default function Admin() {
   const firstCategoryId = categories[0]?.id || '';
   const hasCategories = categories.length > 0;
 
-  const stats = useMemo(() => ({
-    stock: books.reduce((sum, book) => sum + Number(book.quantity || 0), 0),
-    value: books.reduce((sum, book) => sum + Number(book.price || 0) * Number(book.quantity || 0), 0),
-    outOfStock: books.filter((book) => Number(book.quantity || 0) <= 0).length,
-    borrowed: borrows.length,
-    activeBorrows: borrows.filter((borrow) => borrow.status === 'Approved' || borrow.status === 'Active').length,
-    boughtCopies: orders.filter((order) => order.status === 'Approved').reduce((sum, order) => sum + (order.details || []).reduce((detailSum, item) => detailSum + Number(item.quantity || 0), 0), 0),
-  }), [books, borrows, orders]);
-
   const pendingBorrows = useMemo(() => borrows.filter((borrow) => borrow.status === 'Pending'), [borrows]);
   const pendingOrders = useMemo(() => orders.filter((order) => order.status === 'Pending'), [orders]);
   const pendingContactMessages = useMemo(() => contactMessages.filter((message) => message.status === 'Weli lama jawaabin'), [contactMessages]);
   const approvalsTotal = pendingBorrows.length + pendingOrders.length;
-  const lowStock = books.filter((book) => Number(book.quantity || 0) > 0 && Number(book.quantity || 0) <= 2).length;
-  const approvedOrders = orders.filter((order) => order.status === 'Approved');
-  const approvedRevenue = approvedOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-  const adminMetrics = [
-    { icon: UsersRound, label: 'Registered users', value: users.length, detail: 'All accounts currently visible to admin.', tone: 'indigo' },
-    { icon: BookOpen, label: 'Catalog books', value: books.length, detail: `${categories.length} categories connected.`, tone: 'blue' },
-    { icon: Boxes, label: 'Available copies', value: stats.stock, detail: `${lowStock} low stock · ${stats.outOfStock} out of stock.`, tone: 'amber' },
-    { icon: UserRoundCheck, label: 'Borrowed now', value: stats.activeBorrows, detail: 'Books currently approved and in use.', tone: 'purple' },
-    { icon: MessageSquare, label: 'Contact messages', value: pendingContactMessages.length, detail: `${contactMessages.length} messages from members.`, tone: 'indigo' },
-    { icon: ShoppingBag, label: 'Bought copies', value: stats.boughtCopies, detail: `${approvedOrders.length} approved orders.`, tone: 'emerald' },
-    { icon: WalletCards, label: 'Revenue approved', value: money(approvedRevenue), detail: `Inventory value ${money(stats.value)}.`, tone: 'slate' },
-  ];
 
   const memberRows = useMemo(() => users.map((user) => {
     const userId = user.id || user.Id;
@@ -186,7 +142,7 @@ export default function Admin() {
 
   const handleAddBook = () => {
     if (!hasCategories) {
-      setTab('categories');
+      navigate('/admin/categories');
       setModal({ type: 'category', mode: 'create', thenBook: true });
       setForm({ name: '' });
       showToast('Create a category first, then add the book.', 'info');
@@ -254,7 +210,7 @@ export default function Admin() {
       const fresh = await loadData();
       if (shouldOpenBook) {
         const nextCategoryId = fresh?.categories?.[0]?.id || '';
-        setTab('books');
+        navigate('/admin/books');
         setTimeout(() => {
           setModal({ type: 'book', mode: 'create' });
           setForm({ ...emptyBook, categoryId: nextCategoryId });
@@ -338,64 +294,42 @@ export default function Admin() {
   return (
     <DashboardShell title="Admin Panel">
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-col gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <div className="mb-6 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="indigo"><Activity size={13} /> Admin</Badge>
+              <Badge variant="indigo">Admin</Badge>
               <Badge variant={approvalsTotal ? 'warning' : 'success'}>{approvalsTotal} pending</Badge>
+              <Badge variant={pendingContactMessages.length ? 'warning' : 'success'}>{pendingContactMessages.length} messages</Badge>
             </div>
             <h1 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Library operations</h1>
             <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-slate-600">
-              Manage approvals, books, categories, members, roles, stock, and sales from one clean workspace.
+              Door qaybta aad rabto. Approvals, Messages, Books, Categories, iyo Members mid walba meel gooni ah ayuu leeyahay.
             </p>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3 lg:w-auto">
-            <Button variant="secondary" onClick={() => openCreate('category')}><Plus size={18} /> Category</Button>
-            <Button variant="secondary" onClick={() => openCreate('user')}><UsersRound size={18} /> Member</Button>
-            <Button variant="accent" onClick={handleAddBook}><BookPlus size={18} /> Book</Button>
           </div>
         </div>
 
-        <div className="mb-6 grid gap-6 xl:grid-cols-[1fr_420px]">
-          <Card className="p-5 shadow-lg shadow-slate-950/5">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h2 className="text-lg font-black text-slate-950">Operations snapshot</h2>
-                <p className="mt-1 text-sm font-semibold text-slate-500">Quick actions for the most common admin work.</p>
-              </div>
-              <Button variant="ghost" onClick={loadData}><RefreshCw size={17} /> Refresh</Button>
-            </div>
-            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <button onClick={() => setTab('books')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><BookOpen size={20} /></span>
-                <span><span className="block text-sm font-black">Inventory</span><span className="block text-xs font-semibold opacity-75">Books and stock</span></span>
-              </button>
-              <button onClick={() => setTab('members')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><UsersRound size={20} /></span>
-                <span><span className="block text-sm font-black">Members</span><span className="block text-xs font-semibold opacity-75">Roles and users</span></span>
-              </button>
-              <button onClick={() => setTab('categories')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><FolderOpen size={20} /></span>
-                <span><span className="block text-sm font-black">Categories</span><span className="block text-xs font-semibold opacity-75">Catalog groups</span></span>
-              </button>
-              <button onClick={() => setTab('messages')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><MessageSquare size={20} /></span>
-                <span><span className="block text-sm font-black">Messages</span><span className="block text-xs font-semibold opacity-75">Member contact</span></span>
-              </button>
-            </div>
-          </Card>
+        <div className="mb-6 flex justify-end">
+          <Button variant="ghost" onClick={loadData}><RefreshCw size={17} /> Refresh</Button>
+        </div>
 
-          <Card className="overflow-hidden shadow-xl shadow-slate-950/5">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-white px-6 py-5">
-              <div>
-                <h2 className="text-lg font-black text-slate-950">Approval queue</h2>
-                <p className="mt-1 text-sm font-semibold text-slate-500">Borrow and buy requests waiting for admin action.</p>
+        {page === 'approvals' ? (
+          <Card className="overflow-hidden border-indigo-100 shadow-xl shadow-indigo-950/5">
+            <div className="border-b border-slate-100 bg-gradient-to-r from-amber-50 via-white to-indigo-50 px-6 py-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-black text-slate-950">Approval requests</h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">Borrow iyo buy requests ayaa halkan keliya lagu fasaxaa ama lagu diidaa.</p>
+                </div>
+                <Badge variant={approvalsTotal ? 'warning' : 'success'}>{approvalsTotal} pending</Badge>
               </div>
-              <Badge variant={approvalsTotal ? 'warning' : 'success'}>{approvalsTotal} pending</Badge>
             </div>
-            <div className="max-h-[29rem] space-y-3 overflow-y-auto p-4">
-              {loading ? [1, 2, 3].map((item) => <Skeleton key={item} className="h-28" />) : approvalsTotal ? (
-                <>
+            <div className="p-5">
+              {loading ? (
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {[1, 2, 3, 4].map((item) => <Skeleton key={item} className="h-32" />)}
+                </div>
+              ) : approvalsTotal ? (
+                <div className="grid gap-4 lg:grid-cols-2">
                   {pendingBorrows.map((borrow) => (
                     <ApprovalItem
                       key={`borrow-${borrow.id}`}
@@ -423,47 +357,37 @@ export default function Admin() {
                       onReject={() => decideApproval('order', order.id, 'reject')}
                     />
                   ))}
-                </>
+                </div>
               ) : (
-                <EmptyState icon={CheckCircle2} title="Queue is clear" description="No borrow or purchase requests are waiting right now." />
+                <EmptyState icon={CheckCircle2} title="Approval queue is clear" description="No borrow or buy requests are waiting right now." />
               )}
             </div>
           </Card>
-        </div>
-
-        <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {adminMetrics.map((item) => <AdminMetric key={item.label} {...item} />)}
-        </div>
-
-        {!hasCategories && !loading && (
-          <div className="mb-8">
-            <Alert
-              icon={CircleAlert}
-              title="Create a category first"
-              variant="warning"
-              action={<Button variant="primary" onClick={() => openCreate('category')}><Plus size={17} /> Create Category</Button>}
-            >
-              A book cannot be saved until a category is available.
-            </Alert>
-          </div>
-        )}
-
-        <div className="mb-6 flex flex-col justify-between gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
-          <div className="flex flex-wrap gap-1 rounded-2xl bg-slate-100 p-1">
-            <button onClick={() => setTab('books')} className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition ${tab === 'books' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:text-white' : 'text-slate-500 hover:bg-indigo-600 hover:text-white'}`}><BookOpen size={17} /> Books</button>
-            <button onClick={() => setTab('categories')} className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition ${tab === 'categories' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:text-white' : 'text-slate-500 hover:bg-indigo-600 hover:text-white'}`}><FolderOpen size={17} /> Categories</button>
-            <button onClick={() => setTab('members')} className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition ${tab === 'members' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:text-white' : 'text-slate-500 hover:bg-indigo-600 hover:text-white'}`}><UsersRound size={17} /> Members</button>
-            <button onClick={() => setTab('messages')} className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition ${tab === 'messages' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:text-white' : 'text-slate-500 hover:bg-indigo-600 hover:text-white'}`}><MessageSquare size={17} /> Messages</button>
-          </div>
-          <Button variant="ghost" onClick={loadData}><RefreshCw size={17} /> Refresh</Button>
-        </div>
-
-        {tab === 'books' ? (
+        ) : page === 'books' ? (
           <Card className="overflow-hidden">
             <div className="border-b border-slate-100 bg-slate-50 px-6 py-5">
-              <h2 className="text-lg font-black text-slate-950">Books inventory</h2>
-              <p className="mt-1 text-sm font-semibold text-slate-500">Add, edit, and delete records saved in Neon through your backend.</p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-black text-slate-950">Books inventory</h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">Add, edit, and delete books only from this section.</p>
+                </div>
+                <Button variant="accent" onClick={handleAddBook}>
+                  <Plus size={17} /> Add Book
+                </Button>
+              </div>
             </div>
+            {!hasCategories && !loading && (
+              <div className="border-b border-slate-100 p-5">
+                <Alert
+                  icon={CircleAlert}
+                  title="Create a category first"
+                  variant="warning"
+                  action={<Button variant="primary" onClick={() => openCreate('category')}><Plus size={17} /> Create Category</Button>}
+                >
+                  A book cannot be saved until a category is available.
+                </Alert>
+              </div>
+            )}
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left">
                 <thead className="bg-white text-xs font-black uppercase tracking-[0.18em] text-slate-500">
@@ -483,77 +407,91 @@ export default function Admin() {
               </table>
             </div>
           </Card>
-        ) : tab === 'categories' ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {loading ? [1, 2, 3].map((item) => <Skeleton key={item} className="h-28" />) : categories.length ? categories.map((categoryItem) => (
-              <Card key={categoryItem.id} className="flex items-center justify-between p-5 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-950/10">
-                <div className="flex items-center gap-3"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700"><FolderOpen size={22} /></span><div><p className="font-black text-slate-950">{categoryItem.name}</p><p className="text-xs font-bold text-slate-400">Category #{categoryItem.id}</p></div></div>
-                <div className="flex gap-2"><Button variant="secondary" size="sm" onClick={() => openEdit('category', categoryItem)}><Pencil size={15} /></Button><Button variant="danger" size="sm" onClick={() => remove('category', categoryItem.id)}><Trash2 size={15} /></Button></div>
-              </Card>
-            )) : <div className="sm:col-span-2 lg:col-span-3"><EmptyState icon={FolderOpen} title="No categories yet" description="Add a category before saving books." actionLabel="Add Category" onAction={() => openCreate('category')} /></div>}
-          </div>
-        ) : tab === 'messages' ? (
-          <Card className="overflow-hidden border-indigo-100 shadow-xl shadow-indigo-950/5">
-            <div className="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-purple-50 px-6 py-5">
+        ) : page === 'categories' ? (
+          <Card className="overflow-hidden">
+            <div className="border-b border-slate-100 bg-slate-50 px-6 py-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-black text-slate-950">Nala Soo Xiriir messages</h2>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">Akhri fariimaha members-ka, kadib hal jawaab u dir.</p>
+                  <h2 className="text-lg font-black text-slate-950">Categories</h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">Catalog groups are managed only here.</p>
+                </div>
+                <Button variant="accent" onClick={() => openCreate('category')}>
+                  <Plus size={17} /> Add Category
+                </Button>
+              </div>
+            </div>
+            <div className="grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-3">
+              {loading ? [1, 2, 3].map((item) => <Skeleton key={item} className="h-28" />) : categories.length ? categories.map((categoryItem) => (
+                <div key={categoryItem.id} className="flex items-center justify-between rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-950/10">
+                  <div className="flex items-center gap-3"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700"><FolderOpen size={22} /></span><div><p className="font-black text-slate-950">{categoryItem.name}</p><p className="text-xs font-bold text-slate-400">Category #{categoryItem.id}</p></div></div>
+                  <div className="flex gap-2"><Button variant="secondary" size="sm" onClick={() => openEdit('category', categoryItem)}><Pencil size={15} /></Button><Button variant="danger" size="sm" onClick={() => remove('category', categoryItem.id)}><Trash2 size={15} /></Button></div>
+                </div>
+              )) : <div className="sm:col-span-2 lg:col-span-3"><EmptyState icon={FolderOpen} title="No categories yet" description="Add a category before saving books." actionLabel="Add Category" onAction={() => openCreate('category')} /></div>}
+            </div>
+          </Card>
+        ) : page === 'messages' ? (
+          <Card className="mx-auto max-w-5xl overflow-hidden border-slate-700 bg-slate-900 shadow-xl shadow-slate-950/20">
+            <div className="border-b border-slate-700 bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 px-5 py-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-black text-white">Nala Soo Xiriir messages</h2>
+                  <p className="mt-1 text-xs font-semibold text-slate-300">Akhri fariinta, kadib jawaab kooban u dir.</p>
                 </div>
                 <Badge variant={pendingContactMessages.length ? 'warning' : 'success'}>{pendingContactMessages.length} waiting</Badge>
               </div>
             </div>
-            <div className="p-5">
+            <div className="p-4">
               {loading ? (
-                <div className="grid gap-5 lg:grid-cols-2">
-                  {[1, 2, 3, 4].map((item) => <Skeleton key={item} className="h-80" />)}
+                <div className="space-y-3">
+                  {[1, 2, 3].map((item) => <Skeleton key={item} className="h-36" />)}
                 </div>
               ) : contactMessages.length ? (
-                <div className="grid gap-5 lg:grid-cols-2">
+                <div className="space-y-3">
                   {contactMessages.map((contactMessage) => {
                     const id = contactMessage.messageId;
                     const replied = contactMessage.status === 'Waa laga jawaabay';
 
                     return (
-                      <article key={id} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-950/10">
-                        <div className="flex items-start justify-between gap-4">
+                      <article key={id} className="rounded-2xl border border-slate-700 bg-slate-950/45 p-4 shadow-sm transition hover:border-indigo-400">
+                        <div className="grid gap-4 xl:grid-cols-[240px_1fr_300px]">
                           <div className="min-w-0">
-                            <p className="truncate font-black text-slate-950">{contactMessage.userName || `User #${contactMessage.userId}`}</p>
-                            <p className="mt-1 truncate text-sm font-semibold text-slate-500">{contactMessage.userEmail || 'No email'}</p>
-                            <p className="mt-1 text-xs font-bold text-slate-400">Sent {formatDate(contactMessage.createdAt)}</p>
-                          </div>
-                          <Badge variant={replied ? 'success' : 'warning'}>{contactMessage.status}</Badge>
-                        </div>
-
-                        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Fariinta user-ka</p>
-                          <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-slate-700">{contactMessage.message}</p>
-                        </div>
-
-                        {replied ? (
-                          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">Jawaabta maamulka</p>
-                              <p className="text-xs font-bold text-emerald-700">{formatDate(contactMessage.repliedAt)}</p>
+                            <div className="flex items-start justify-between gap-3 xl:block">
+                              <div className="min-w-0">
+                                <p className="truncate font-black text-white">{contactMessage.userName || `User #${contactMessage.userId}`}</p>
+                                <p className="mt-1 truncate text-xs font-semibold text-slate-300">{contactMessage.userEmail || 'No email'}</p>
+                                <p className="mt-2 text-xs font-bold text-slate-400">{formatDate(contactMessage.createdAt)}</p>
+                              </div>
+                              <Badge variant={replied ? 'success' : 'warning'}>{contactMessage.status}</Badge>
                             </div>
-                            <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-emerald-950">{contactMessage.adminReply}</p>
                           </div>
-                        ) : (
-                          <div className="mt-4 space-y-3">
-                            <label className="block space-y-2">
-                              <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qor jawaabta</span>
+
+                          <div className="rounded-2xl border border-slate-700 bg-slate-900 p-3">
+                            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">Fariinta</p>
+                            <p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-slate-100">{contactMessage.message}</p>
+                          </div>
+
+                          {replied ? (
+                            <div className="rounded-2xl border border-emerald-700/50 bg-emerald-950/30 p-3">
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-emerald-300">Jawaab</p>
+                                <p className="text-[11px] font-bold text-emerald-300">{formatDate(contactMessage.repliedAt)}</p>
+                              </div>
+                              <p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-emerald-50">{contactMessage.adminReply}</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
                               <textarea
                                 value={replyDrafts[id] || ''}
                                 onChange={(event) => updateReplyDraft(id, event.target.value)}
-                                placeholder="Jawaabta maamulka ku qor halkan..."
-                                className="min-h-32 w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold leading-7 text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                                placeholder="Jawaabta ku qor..."
+                                className="min-h-24 w-full resize-y rounded-2xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-semibold leading-6 text-white outline-none transition placeholder:text-slate-500 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10"
                               />
-                            </label>
-                            <Button variant="accent" loading={replyingMessage === id} onClick={() => sendReply(id)}>
-                              <Send size={16} /> Dir Jawaabta
-                            </Button>
-                          </div>
-                        )}
+                              <Button variant="accent" size="sm" loading={replyingMessage === id} onClick={() => sendReply(id)} className="w-full">
+                                <Send size={15} /> Dir Jawaabta
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </article>
                     );
                   })}

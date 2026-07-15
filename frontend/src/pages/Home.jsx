@@ -20,6 +20,68 @@ import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 
 const HERO_IMAGE_URL = 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=2400&q=90';
+const LIBRARY_GALLERY = [
+  {
+    src: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=86',
+    alt: 'Quiet library reading tables',
+    className: 'md:col-span-2 md:row-span-2',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=900&q=86',
+    alt: 'Books arranged on shelves',
+    className: '',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=900&q=86',
+    alt: 'Open books on a study desk',
+    className: '',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=900&q=86',
+    alt: 'Stack of books and reading materials',
+    className: '',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=86',
+    alt: 'Colorful books standing on a shelf',
+    className: '',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1100&q=86',
+    alt: 'Library shelves with many books',
+    className: 'md:col-span-2',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=900&q=86',
+    alt: 'Person reading a book in a library',
+    className: '',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1200&q=86',
+    alt: 'Tall library wall of books',
+    className: 'md:col-span-2 md:row-span-2',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=86',
+    alt: 'Students reading and studying together',
+    className: '',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1526243741027-444d633d7365?auto=format&fit=crop&w=900&q=86',
+    alt: 'Book pages close up',
+    className: '',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1200&q=86',
+    alt: 'Large library interior',
+    className: 'md:col-span-2',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1463320726281-696a485928c7?auto=format&fit=crop&w=900&q=86',
+    alt: 'Open book on a table',
+    className: '',
+  },
+];
 
 function defaultReturnDate() {
   const date = new Date();
@@ -181,6 +243,26 @@ export default function Home() {
         ) : (
           <EmptyState icon={BookOpen} title="Books coming soon" description="Books will appear here as soon as they are available." />
         )}
+      </section>
+
+      <section className="border-y border-slate-200/80 bg-white px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid auto-rows-[13rem] gap-4 md:grid-cols-4 md:auto-rows-[16rem]">
+            {LIBRARY_GALLERY.map((image) => (
+              <figure
+                key={image.src}
+                className={`group relative overflow-hidden rounded-[1.25rem] border border-slate-200 bg-slate-100 shadow-lg shadow-slate-950/5 ${image.className}`}
+              >
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+              </figure>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section id="about" className="scroll-mt-24 border-y border-slate-200/80 bg-white/70 px-4 py-16 sm:px-6 lg:px-8">

@@ -74,7 +74,8 @@ export default function Navbar() {
           ))}
           {user && !isAdmin && <NavLink to="/contact" className={navClass}>Nala Soo Xiriir</NavLink>}
           {user && <NavLink to="/dashboard" className={navClass}>Dashboard</NavLink>}
-          {isAdmin && <NavLink to="/admin" className={navClass}>Admin</NavLink>}
+          {isAdmin && <NavLink to="/admin/messages" className={navClass}>Messages</NavLink>}
+          {isAdmin && <NavLink to="/admin/books" className={navClass}>Admin</NavLink>}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -105,6 +106,7 @@ export default function Navbar() {
                   </div>
                   <Link to="/dashboard" onClick={close} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50"><LayoutDashboard size={16} /> Dashboard</Link>
                   {!isAdmin && <Link to="/contact" onClick={close} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50"><MessageSquare size={16} /> Nala Soo Xiriir</Link>}
+                  {isAdmin && <Link to="/admin/messages" onClick={close} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50"><MessageSquare size={16} /> Messages</Link>}
                   <button onClick={() => { logout(); close(); }} className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-bold text-red-600 hover:bg-red-50">
                     <LogOut size={16} /> Logout
                   </button>
@@ -128,8 +130,9 @@ export default function Navbar() {
             {sectionLinks.map((link) => <Link key={link.id} to={`/#${link.id}`} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-indigo-600 hover:text-white" onClick={(event) => goToSection(event, link.id)}>{link.label}</Link>)}
             {user && !isAdmin && <NavLink to="/contact" className={navClass} onClick={close}><MessageSquare size={16} /> Nala Soo Xiriir</NavLink>}
             {user && <NavLink to="/dashboard" className={navClass} onClick={close}><LayoutDashboard size={16} /> Dashboard</NavLink>}
-            {isAdmin && <NavLink to="/admin" className={navClass} onClick={close}>Admin</NavLink>}
-            {user && isAdmin && <NavLink to="/admin" className={navClass} onClick={close}><Bell size={16} /> Notifications</NavLink>}
+            {isAdmin && <NavLink to="/admin/messages" className={navClass} onClick={close}><MessageSquare size={16} /> Messages</NavLink>}
+            {isAdmin && <NavLink to="/admin/books" className={navClass} onClick={close}>Admin</NavLink>}
+            {user && isAdmin && <NavLink to="/admin/approvals" className={navClass} onClick={close}><Bell size={16} /> Notifications</NavLink>}
             <NavLink to="/cart" className={navClass} onClick={close}>Cart ({count})</NavLink>
             {user ? (
               <button onClick={() => { logout(); close(); }} className="rounded-full px-4 py-3 text-left text-sm font-black text-red-600 hover:bg-red-50">Logout</button>

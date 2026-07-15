@@ -47,6 +47,7 @@ export default function App() {
                 <Route path="contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
                 <Route path="cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
                 <Route path="admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+                <Route path="admin/:section" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

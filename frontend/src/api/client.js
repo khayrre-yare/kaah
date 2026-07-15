@@ -1,5 +1,13 @@
-const DEFAULT_API_BASE = '/api';
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE).replace(/\/$/, '');
+const PRODUCTION_API_BASE = 'https://kaah-production.up.railway.app/api';
+const DEFAULT_API_BASE = import.meta.env.DEV ? '/api' : PRODUCTION_API_BASE;
+
+function normalizeApiBase(value) {
+  const cleanBase = (value || DEFAULT_API_BASE).replace(/\/$/, '');
+  if (cleanBase === '/api' || cleanBase.endsWith('/api')) return cleanBase;
+  return `${cleanBase}/api`;
+}
+
+const API_BASE = normalizeApiBase(import.meta.env.VITE_API_BASE_URL);
 const AUTH_STORAGE_KEY = 'kaah3_auth_v1';
 
 function decodeJwtPayload(token) {
