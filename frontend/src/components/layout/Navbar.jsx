@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Bell, BookOpen, ChevronDown, LayoutDashboard, LogOut, Menu, Moon, ShieldCheck, ShoppingBag, Sun, UserRound, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -11,8 +11,8 @@ const publicLinks = [
 ];
 
 const sectionLinks = [
-  { to: '/#about', label: 'About' },
-  { to: '/#contact', label: 'Contact' },
+  { id: 'about', label: 'About' },
+  { id: 'contact', label: 'Contact' },
 ];
 
 function navClass({ isActive }) {
@@ -29,6 +29,7 @@ export default function Navbar() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('kaah_theme') === 'dark');
   const { user, logout, isAdmin } = useAuth();
   const { count } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.documentElement.classList.toggle('theme-dark', darkMode);
@@ -41,6 +42,16 @@ export default function Navbar() {
   };
 
   const toggleTheme = () => setDarkMode((value) => !value);
+
+  const goToSection = (event, id) => {
+    event.preventDefault();
+    close();
+    navigate('/');
+    window.setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.replaceState(null, '', `/#${id}`);
+    }, 90);
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200/80 bg-white/88 backdrop-blur-xl">
@@ -58,7 +69,7 @@ export default function Navbar() {
         <div className="hidden items-center gap-2 lg:flex">
           {publicLinks.map((link) => <NavLink key={link.to} to={link.to} className={navClass}>{link.label}</NavLink>)}
           {sectionLinks.map((link) => (
-            <Link key={link.to} to={link.to} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-indigo-600 hover:text-white">
+            <Link key={link.id} to={`/#${link.id}`} onClick={(event) => goToSection(event, link.id)} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-indigo-600 hover:text-white">
               {link.label}
             </Link>
           ))}
@@ -113,7 +124,7 @@ export default function Navbar() {
         <div className="border-t border-slate-200 bg-white px-4 py-4 shadow-2xl lg:hidden">
           <div className="flex flex-col gap-2">
             {publicLinks.map((link) => <NavLink key={link.to} to={link.to} className={navClass} onClick={close}>{link.label}</NavLink>)}
-            {sectionLinks.map((link) => <Link key={link.to} to={link.to} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-indigo-600 hover:text-white" onClick={close}>{link.label}</Link>)}
+            {sectionLinks.map((link) => <Link key={link.id} to={`/#${link.id}`} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-indigo-600 hover:text-white" onClick={(event) => goToSection(event, link.id)}>{link.label}</Link>)}
             {user && <NavLink to="/dashboard" className={navClass} onClick={close}><LayoutDashboard size={16} /> Dashboard</NavLink>}
             {isAdmin && <NavLink to="/admin" className={navClass} onClick={close}>Admin</NavLink>}
             {user && isAdmin && <NavLink to="/admin" className={navClass} onClick={close}><Bell size={16} /> Notifications</NavLink>}

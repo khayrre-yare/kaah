@@ -5,8 +5,10 @@ import {
   BookOpen,
   CalendarDays,
   Mail,
+  MessageSquare,
   MapPin,
   Phone,
+  Send,
   Sparkles,
   UsersRound,
 } from 'lucide-react';
@@ -45,6 +47,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [borrowBook, setBorrowBook] = useState(null);
   const [returnDate, setReturnDate] = useState(defaultReturnDate());
+  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const { user } = useAuth();
   const { addItem } = useCart();
@@ -113,6 +116,33 @@ export default function Home() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const updateContact = (field) => (event) => {
+    setContactForm((current) => ({ ...current, [field]: event.target.value }));
+  };
+
+  const submitContact = (event) => {
+    event.preventDefault();
+    const name = contactForm.name.trim();
+    const email = contactForm.email.trim();
+    const subject = contactForm.subject.trim() || 'Library support request';
+    const message = contactForm.message.trim();
+
+    if (!name || !email || !message) {
+      showToast('Please fill your name, email, and message.', 'error');
+      return;
+    }
+
+    const body = [
+      `Name: ${name}`,
+      `Email: ${email}`,
+      '',
+      message,
+    ].join('\n');
+
+    window.location.href = `mailto:info@kaahlibrary.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    showToast('Email app is opening with your message ready.', 'info');
   };
 
   return (
@@ -186,7 +216,7 @@ export default function Home() {
         )}
       </section>
 
-      <section id="about" className="border-y border-slate-200/80 bg-white/70 px-4 py-16 sm:px-6 lg:px-8">
+      <section id="about" className="scroll-mt-24 border-y border-slate-200/80 bg-white/70 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.24em] text-indigo-700">About Kaah Library</p>
@@ -238,31 +268,60 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="contact" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-950/5 lg:grid-cols-[0.9fr_1.1fr] lg:p-8">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-indigo-700">Contact</p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950">Need help from the library team?</h2>
-            <p className="mt-4 text-sm leading-7 text-slate-600">
-              Wixii ku saabsan login, borrow approval, buy orders, ama book returns, library team-ka si fudud ayaad ula xiriiri kartaa.
-            </p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <a href="mailto:info@kaahlibrary.com" className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
-              <Mail size={22} />
-              <p className="mt-4 text-sm font-black">Email</p>
-              <p className="mt-1 text-xs font-semibold opacity-75">info@kaahlibrary.com</p>
-            </a>
-            <a href="tel:+252610000000" className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
-              <Phone size={22} />
-              <p className="mt-4 text-sm font-black">Phone</p>
-              <p className="mt-1 text-xs font-semibold opacity-75">+252 61 000 0000</p>
-            </a>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-              <MapPin size={22} className="text-indigo-600" />
-              <p className="mt-4 text-sm font-black text-slate-950">Location</p>
-              <p className="mt-1 text-xs font-semibold text-slate-500">Kaah Library Center</p>
+      <section id="contact" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-slate-950/10">
+          <div className="grid gap-0 lg:grid-cols-[0.85fr_1.15fr]">
+            <div className="relative overflow-hidden bg-slate-950 p-6 text-white lg:p-8">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,.42),transparent_24rem),radial-gradient(circle_at_bottom_right,rgba(147,51,234,.28),transparent_22rem)]" />
+              <div className="relative">
+                <Badge className="border-white/15 bg-white/10 text-white">
+                  <MessageSquare size={13} /> Contact desk
+                </Badge>
+                <h2 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">Talk to Kaah Library</h2>
+                <p className="mt-4 text-sm font-semibold leading-7 text-slate-300">
+                  Buuxi form-kan si library team-ku u helo fariintaada. Email app-kaaga ayaa furmaya iyadoo fariintu diyaar tahay.
+                </p>
+                <div className="mt-8 space-y-4">
+                  <a href="mailto:info@kaahlibrary.com" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur transition hover:bg-white/15">
+                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-indigo-700"><Mail size={20} /></span>
+                    <span><span className="block text-sm font-black">Email</span><span className="block text-xs font-semibold text-white/70">info@kaahlibrary.com</span></span>
+                  </a>
+                  <a href="tel:+252610000000" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur transition hover:bg-white/15">
+                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-indigo-700"><Phone size={20} /></span>
+                    <span><span className="block text-sm font-black">Phone</span><span className="block text-xs font-semibold text-white/70">+252 61 000 0000</span></span>
+                  </a>
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-indigo-700"><MapPin size={20} /></span>
+                    <span><span className="block text-sm font-black">Location</span><span className="block text-xs font-semibold text-white/70">Kaah Library Center</span></span>
+                  </div>
+                </div>
+              </div>
             </div>
+            <form onSubmit={submitContact} className="grid gap-5 p-6 lg:p-8">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-indigo-700">Send a message</p>
+                <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-950">How can we help?</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">Write your question about books, borrowing, returns, orders, or account access.</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Input label="Full name" required value={contactForm.name} onChange={updateContact('name')} placeholder="Your name" />
+                <Input label="Email" type="email" required value={contactForm.email} onChange={updateContact('email')} placeholder="you@example.com" />
+              </div>
+              <Input label="Subject" value={contactForm.subject} onChange={updateContact('subject')} placeholder="Borrow request help" />
+              <label className="block space-y-2">
+                <span className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Message</span>
+                <textarea
+                  required
+                  value={contactForm.message}
+                  onChange={updateContact('message')}
+                  placeholder="Write your message..."
+                  className="min-h-36 w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                />
+              </label>
+              <Button type="submit" variant="accent" className="w-full sm:w-auto">
+                <Send size={17} /> Send message
+              </Button>
+            </form>
           </div>
         </div>
       </section>
