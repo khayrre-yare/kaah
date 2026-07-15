@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Cart from './pages/Cart';
 import Admin from './pages/Admin';
+import Contact from './pages/Contact';
 
 function NotFound() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
                 <Route path="register" element={<Register />} />
                 <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="my-books" element={<ProtectedRoute><Dashboard booksOnly /></ProtectedRoute>} />
+                <Route path="contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
                 <Route path="cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
                 <Route path="admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />

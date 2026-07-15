@@ -213,3 +213,15 @@ export const usersApi = {
   }),
   delete: (id) => apiRequest(`/Users/${id}`, { method: 'DELETE' }),
 };
+
+export const contactMessagesApi = {
+  getAll: () => apiRequest('/ContactMessages'),
+  create: ({ message }) => apiRequest('/ContactMessages', {
+    method: 'POST',
+    body: JSON.stringify({ Message: message }),
+  }),
+  reply: (id, { adminReply }) => apiRequest(`/ContactMessages/${id}/reply`, {
+    method: 'PUT',
+    body: JSON.stringify({ AdminReply: adminReply }),
+  }),
+};

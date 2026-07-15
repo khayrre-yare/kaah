@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Bell, BookOpen, ChevronDown, LayoutDashboard, LogOut, Menu, Moon, ShieldCheck, ShoppingBag, Sun, UserRound, X } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, LayoutDashboard, LogOut, Menu, MessageSquare, Moon, ShieldCheck, ShoppingBag, Sun, UserRound, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import AdminNotifications from './AdminNotifications';
@@ -12,7 +12,6 @@ const publicLinks = [
 
 const sectionLinks = [
   { id: 'about', label: 'About' },
-  { id: 'contact', label: 'Contact' },
 ];
 
 function navClass({ isActive }) {
@@ -73,6 +72,7 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          {user && !isAdmin && <NavLink to="/contact" className={navClass}>Nala Soo Xiriir</NavLink>}
           {user && <NavLink to="/dashboard" className={navClass}>Dashboard</NavLink>}
           {isAdmin && <NavLink to="/admin" className={navClass}>Admin</NavLink>}
         </div>
@@ -104,6 +104,7 @@ export default function Navbar() {
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{user.role || 'Member'}</p>
                   </div>
                   <Link to="/dashboard" onClick={close} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50"><LayoutDashboard size={16} /> Dashboard</Link>
+                  {!isAdmin && <Link to="/contact" onClick={close} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50"><MessageSquare size={16} /> Nala Soo Xiriir</Link>}
                   <button onClick={() => { logout(); close(); }} className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-bold text-red-600 hover:bg-red-50">
                     <LogOut size={16} /> Logout
                   </button>
@@ -125,6 +126,7 @@ export default function Navbar() {
           <div className="flex flex-col gap-2">
             {publicLinks.map((link) => <NavLink key={link.to} to={link.to} className={navClass} onClick={close}>{link.label}</NavLink>)}
             {sectionLinks.map((link) => <Link key={link.id} to={`/#${link.id}`} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-indigo-600 hover:text-white" onClick={(event) => goToSection(event, link.id)}>{link.label}</Link>)}
+            {user && !isAdmin && <NavLink to="/contact" className={navClass} onClick={close}><MessageSquare size={16} /> Nala Soo Xiriir</NavLink>}
             {user && <NavLink to="/dashboard" className={navClass} onClick={close}><LayoutDashboard size={16} /> Dashboard</NavLink>}
             {isAdmin && <NavLink to="/admin" className={navClass} onClick={close}>Admin</NavLink>}
             {user && isAdmin && <NavLink to="/admin" className={navClass} onClick={close}><Bell size={16} /> Notifications</NavLink>}

@@ -5,6 +5,7 @@ import {
   LibraryBig,
   LogOut,
   Menu,
+  MessageSquare,
   PanelLeftClose,
   PanelLeftOpen,
   ShieldCheck,
@@ -32,6 +33,7 @@ export default function DashboardShell({ children }) {
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LibraryBig },
     { to: isAdmin ? '/books' : '/my-books', label: isAdmin ? 'Books' : 'My Books', icon: BookOpen },
+    ...(!isAdmin ? [{ to: '/contact', label: 'Nala Soo Xiriir', icon: MessageSquare }] : []),
     { to: '/cart', label: 'Cart', icon: ShoppingBag, badge: count },
     ...(isAdmin ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck }] : []),
   ];

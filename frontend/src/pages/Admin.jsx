@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, BookOpen, BookPlus, Boxes, CheckCircle2, CircleAlert, FolderOpen, Pencil, Plus, RefreshCw, ShoppingBag, Trash2, UserRoundCheck, UsersRound, WalletCards } from 'lucide-react';
-import { booksApi, borrowsApi, categoriesApi, ordersApi, usersApi } from '../api/client';
+import { Activity, BookOpen, BookPlus, Boxes, CheckCircle2, CircleAlert, FolderOpen, MessageSquare, Pencil, Plus, RefreshCw, Send, ShoppingBag, Trash2, UserRoundCheck, UsersRound, WalletCards } from 'lucide-react';
+import { booksApi, borrowsApi, categoriesApi, contactMessagesApi, ordersApi, usersApi } from '../api/client';
 import DashboardShell from '../components/layout/DashboardShell';
 import Alert from '../components/ui/Alert';
 import Badge from '../components/ui/Badge';
@@ -85,6 +85,8 @@ export default function Admin() {
   const [users, setUsers] = useState([]);
   const [borrows, setBorrows] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [contactMessages, setContactMessages] = useState([]);
+  const [replyDrafts, setReplyDrafts] = useState({});
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState(emptyBook);
@@ -92,23 +94,26 @@ export default function Admin() {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [approvalAction, setApprovalAction] = useState(null);
+  const [replyingMessage, setReplyingMessage] = useState(null);
   const { showToast } = useToast();
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [bookData, categoryData, userData, borrowData, orderData] = await Promise.all([
+      const [bookData, categoryData, userData, borrowData, orderData, contactData] = await Promise.all([
         booksApi.getAll(),
         categoriesApi.getAll(),
         usersApi.getAll(),
         borrowsApi.getAll(),
         ordersApi.getAll(),
+        contactMessagesApi.getAll(),
       ]);
       setBooks(bookData || []);
       setCategories(categoryData || []);
       setUsers(userData || []);
       setBorrows(borrowData || []);
       setOrders(orderData || []);
+      setContactMessages(contactData || []);
       return { books: bookData || [], categories: categoryData || [] };
     } catch (error) {
       showToast(error.message, 'error');
@@ -133,6 +138,7 @@ export default function Admin() {
 
   const pendingBorrows = useMemo(() => borrows.filter((borrow) => borrow.status === 'Pending'), [borrows]);
   const pendingOrders = useMemo(() => orders.filter((order) => order.status === 'Pending'), [orders]);
+  const pendingContactMessages = useMemo(() => contactMessages.filter((message) => message.status === 'Weli lama jawaabin'), [contactMessages]);
   const approvalsTotal = pendingBorrows.length + pendingOrders.length;
   const lowStock = books.filter((book) => Number(book.quantity || 0) > 0 && Number(book.quantity || 0) <= 2).length;
   const approvedOrders = orders.filter((order) => order.status === 'Approved');
@@ -142,6 +148,7 @@ export default function Admin() {
     { icon: BookOpen, label: 'Catalog books', value: books.length, detail: `${categories.length} categories connected.`, tone: 'blue' },
     { icon: Boxes, label: 'Available copies', value: stats.stock, detail: `${lowStock} low stock · ${stats.outOfStock} out of stock.`, tone: 'amber' },
     { icon: UserRoundCheck, label: 'Borrowed now', value: stats.activeBorrows, detail: 'Books currently approved and in use.', tone: 'purple' },
+    { icon: MessageSquare, label: 'Contact messages', value: pendingContactMessages.length, detail: `${contactMessages.length} messages from members.`, tone: 'indigo' },
     { icon: ShoppingBag, label: 'Bought copies', value: stats.boughtCopies, detail: `${approvedOrders.length} approved orders.`, tone: 'emerald' },
     { icon: WalletCards, label: 'Revenue approved', value: money(approvedRevenue), detail: `Inventory value ${money(stats.value)}.`, tone: 'slate' },
   ];
@@ -280,6 +287,31 @@ export default function Admin() {
     }
   };
 
+  const updateReplyDraft = (id, value) => {
+    setReplyDrafts((current) => ({ ...current, [id]: value }));
+  };
+
+  const sendReply = async (id) => {
+    const adminReply = normalizeText(replyDrafts[id]);
+
+    if (!adminReply) {
+      showToast('Qor jawaabta maamulka marka hore.', 'error');
+      return;
+    }
+
+    setReplyingMessage(id);
+    try {
+      await contactMessagesApi.reply(id, { adminReply });
+      showToast('Jawaabta waa la diray.');
+      setReplyDrafts((current) => ({ ...current, [id]: '' }));
+      await loadData();
+    } catch (error) {
+      showToast(error.message, 'error');
+    } finally {
+      setReplyingMessage(null);
+    }
+  };
+
   const confirmRemove = async () => {
     if (!pendingDelete) return;
     setDeleting(true);
@@ -333,7 +365,7 @@ export default function Admin() {
               </div>
               <Button variant="ghost" onClick={loadData}><RefreshCw size={17} /> Refresh</Button>
             </div>
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <button onClick={() => setTab('books')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><BookOpen size={20} /></span>
                 <span><span className="block text-sm font-black">Inventory</span><span className="block text-xs font-semibold opacity-75">Books and stock</span></span>
@@ -345,6 +377,10 @@ export default function Admin() {
               <button onClick={() => setTab('categories')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><FolderOpen size={20} /></span>
                 <span><span className="block text-sm font-black">Categories</span><span className="block text-xs font-semibold opacity-75">Catalog groups</span></span>
+              </button>
+              <button onClick={() => setTab('messages')} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-indigo-700 shadow-sm"><MessageSquare size={20} /></span>
+                <span><span className="block text-sm font-black">Messages</span><span className="block text-xs font-semibold opacity-75">Member contact</span></span>
               </button>
             </div>
           </Card>
@@ -413,10 +449,11 @@ export default function Admin() {
         )}
 
         <div className="mb-6 flex flex-col justify-between gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
-          <div className="inline-flex rounded-2xl bg-slate-100 p-1">
+          <div className="flex flex-wrap gap-1 rounded-2xl bg-slate-100 p-1">
             <button onClick={() => setTab('books')} className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition ${tab === 'books' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:text-white' : 'text-slate-500 hover:bg-indigo-600 hover:text-white'}`}><BookOpen size={17} /> Books</button>
             <button onClick={() => setTab('categories')} className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition ${tab === 'categories' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:text-white' : 'text-slate-500 hover:bg-indigo-600 hover:text-white'}`}><FolderOpen size={17} /> Categories</button>
             <button onClick={() => setTab('members')} className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition ${tab === 'members' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:text-white' : 'text-slate-500 hover:bg-indigo-600 hover:text-white'}`}><UsersRound size={17} /> Members</button>
+            <button onClick={() => setTab('messages')} className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black transition ${tab === 'messages' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 hover:text-white' : 'text-slate-500 hover:bg-indigo-600 hover:text-white'}`}><MessageSquare size={17} /> Messages</button>
           </div>
           <Button variant="ghost" onClick={loadData}><RefreshCw size={17} /> Refresh</Button>
         </div>
@@ -455,6 +492,77 @@ export default function Admin() {
               </Card>
             )) : <div className="sm:col-span-2 lg:col-span-3"><EmptyState icon={FolderOpen} title="No categories yet" description="Add a category before saving books." actionLabel="Add Category" onAction={() => openCreate('category')} /></div>}
           </div>
+        ) : tab === 'messages' ? (
+          <Card className="overflow-hidden border-indigo-100 shadow-xl shadow-indigo-950/5">
+            <div className="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-purple-50 px-6 py-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-black text-slate-950">Nala Soo Xiriir messages</h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">Akhri fariimaha members-ka, kadib hal jawaab u dir.</p>
+                </div>
+                <Badge variant={pendingContactMessages.length ? 'warning' : 'success'}>{pendingContactMessages.length} waiting</Badge>
+              </div>
+            </div>
+            <div className="p-5">
+              {loading ? (
+                <div className="grid gap-5 lg:grid-cols-2">
+                  {[1, 2, 3, 4].map((item) => <Skeleton key={item} className="h-80" />)}
+                </div>
+              ) : contactMessages.length ? (
+                <div className="grid gap-5 lg:grid-cols-2">
+                  {contactMessages.map((contactMessage) => {
+                    const id = contactMessage.messageId;
+                    const replied = contactMessage.status === 'Waa laga jawaabay';
+
+                    return (
+                      <article key={id} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-950/10">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <p className="truncate font-black text-slate-950">{contactMessage.userName || `User #${contactMessage.userId}`}</p>
+                            <p className="mt-1 truncate text-sm font-semibold text-slate-500">{contactMessage.userEmail || 'No email'}</p>
+                            <p className="mt-1 text-xs font-bold text-slate-400">Sent {formatDate(contactMessage.createdAt)}</p>
+                          </div>
+                          <Badge variant={replied ? 'success' : 'warning'}>{contactMessage.status}</Badge>
+                        </div>
+
+                        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Fariinta user-ka</p>
+                          <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-slate-700">{contactMessage.message}</p>
+                        </div>
+
+                        {replied ? (
+                          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">Jawaabta maamulka</p>
+                              <p className="text-xs font-bold text-emerald-700">{formatDate(contactMessage.repliedAt)}</p>
+                            </div>
+                            <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-7 text-emerald-950">{contactMessage.adminReply}</p>
+                          </div>
+                        ) : (
+                          <div className="mt-4 space-y-3">
+                            <label className="block space-y-2">
+                              <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qor jawaabta</span>
+                              <textarea
+                                value={replyDrafts[id] || ''}
+                                onChange={(event) => updateReplyDraft(id, event.target.value)}
+                                placeholder="Jawaabta maamulka ku qor halkan..."
+                                className="min-h-32 w-full resize-y rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold leading-7 text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                              />
+                            </label>
+                            <Button variant="accent" loading={replyingMessage === id} onClick={() => sendReply(id)}>
+                              <Send size={16} /> Dir Jawaabta
+                            </Button>
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState icon={MessageSquare} title="Fariimo ma jiraan" description="Marka user-ku fariin ka soo diro Nala Soo Xiriir, halkan ayay ka muuqan doontaa." />
+              )}
+            </div>
+          </Card>
         ) : (
           <Card className="overflow-hidden border-indigo-100 shadow-xl shadow-indigo-950/5">
             <div className="border-b border-slate-100 bg-gradient-to-r from-indigo-50 via-white to-purple-50 px-6 py-5">
