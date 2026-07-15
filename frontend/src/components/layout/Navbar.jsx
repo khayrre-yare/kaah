@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Bell, BookOpen, ChevronDown, LayoutDashboard, LogOut, Menu, ShieldCheck, ShoppingBag, UserRound, X } from 'lucide-react';
+import { Bell, BookOpen, ChevronDown, LayoutDashboard, LogOut, Menu, Moon, ShieldCheck, ShoppingBag, Sun, UserRound, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import AdminNotifications from './AdminNotifications';
@@ -8,6 +8,11 @@ import AdminNotifications from './AdminNotifications';
 const publicLinks = [
   { to: '/', label: 'Home' },
   { to: '/books', label: 'Books' },
+];
+
+const sectionLinks = [
+  { to: '/#about', label: 'About' },
+  { to: '/#contact', label: 'Contact' },
 ];
 
 function navClass({ isActive }) {
@@ -21,13 +26,21 @@ function navClass({ isActive }) {
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('kaah_theme') === 'dark');
   const { user, logout, isAdmin } = useAuth();
   const { count } = useCart();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('theme-dark', darkMode);
+    localStorage.setItem('kaah_theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   const close = () => {
     setOpen(false);
     setProfileOpen(false);
   };
+
+  const toggleTheme = () => setDarkMode((value) => !value);
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200/80 bg-white/88 backdrop-blur-xl">
@@ -44,11 +57,19 @@ export default function Navbar() {
 
         <div className="hidden items-center gap-2 lg:flex">
           {publicLinks.map((link) => <NavLink key={link.to} to={link.to} className={navClass}>{link.label}</NavLink>)}
+          {sectionLinks.map((link) => (
+            <Link key={link.to} to={link.to} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-indigo-600 hover:text-white">
+              {link.label}
+            </Link>
+          ))}
           {user && <NavLink to="/dashboard" className={navClass}>Dashboard</NavLink>}
           {isAdmin && <NavLink to="/admin" className={navClass}>Admin</NavLink>}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <button onClick={toggleTheme} className="focus-ring grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700" aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           {user && isAdmin && <AdminNotifications buttonClassName="h-11 w-11" />}
           <Link to="/cart" className="relative inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-black text-slate-800 transition hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 hover:shadow-lg">
             <ShoppingBag size={18} /> Cart
@@ -92,6 +113,7 @@ export default function Navbar() {
         <div className="border-t border-slate-200 bg-white px-4 py-4 shadow-2xl lg:hidden">
           <div className="flex flex-col gap-2">
             {publicLinks.map((link) => <NavLink key={link.to} to={link.to} className={navClass} onClick={close}>{link.label}</NavLink>)}
+            {sectionLinks.map((link) => <Link key={link.to} to={link.to} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-indigo-600 hover:text-white" onClick={close}>{link.label}</Link>)}
             {user && <NavLink to="/dashboard" className={navClass} onClick={close}><LayoutDashboard size={16} /> Dashboard</NavLink>}
             {isAdmin && <NavLink to="/admin" className={navClass} onClick={close}>Admin</NavLink>}
             {user && isAdmin && <NavLink to="/admin" className={navClass} onClick={close}><Bell size={16} /> Notifications</NavLink>}
@@ -101,6 +123,9 @@ export default function Navbar() {
             ) : (
               <NavLink to="/login" className={navClass} onClick={close}>Login</NavLink>
             )}
+            <button onClick={toggleTheme} className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-left text-sm font-black text-slate-700 transition hover:bg-indigo-600 hover:text-white">
+              {darkMode ? <Sun size={16} /> : <Moon size={16} />} {darkMode ? 'Light mode' : 'Dark mode'}
+            </button>
           </div>
         </div>
       )}

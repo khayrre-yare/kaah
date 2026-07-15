@@ -4,7 +4,11 @@ import {
   ArrowRight,
   BookOpen,
   CalendarDays,
+  Mail,
+  MapPin,
+  Phone,
   Sparkles,
+  UsersRound,
 } from 'lucide-react';
 import { booksApi, borrowsApi, categoriesApi } from '../api/client';
 import BookCard from '../components/BookCard';
@@ -18,7 +22,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 
-const HERO_IMAGE_URL = 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=2200&q=85';
+const HERO_IMAGE_URL = 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=2400&q=90';
 
 function defaultReturnDate() {
   const date = new Date();
@@ -180,6 +184,87 @@ export default function Home() {
         ) : (
           <EmptyState icon={BookOpen} title="Books coming soon" description="Books will appear here as soon as they are available." />
         )}
+      </section>
+
+      <section id="about" className="border-y border-slate-200/80 bg-white/70 px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-indigo-700">About Kaah Library</p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+              A modern library workflow for members and admins.
+            </h2>
+            <p className="mt-4 text-base leading-8 text-slate-600">
+              Kaah Library waxay isku xirtaa catalog-ka buugaagta, borrow requests, buy orders, admin approvals, iyo member dashboards. User-ku wuxuu arkaa buugaagtiisa, admin-kuna wuxuu si cad u maamulaa stock, members, iyo requests.
+            </p>
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <BookOpen className="text-indigo-600" size={22} />
+                <p className="mt-3 text-sm font-black text-slate-950">Live Catalog</p>
+                <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">Books and categories from your backend.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <UsersRound className="text-purple-600" size={22} />
+                <p className="mt-3 text-sm font-black text-slate-950">Member Flow</p>
+                <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">Borrow, buy, track, and return books.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <Sparkles className="text-blue-600" size={22} />
+                <p className="mt-3 text-sm font-black text-slate-950">Admin Control</p>
+                <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">Approve requests and manage users.</p>
+              </div>
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-slate-950/10">
+            <img
+              src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=85"
+              alt="Modern library shelves"
+              className="h-80 w-full object-cover"
+            />
+            <div className="grid gap-4 p-5 sm:grid-cols-3">
+              <div className="rounded-2xl bg-indigo-50 p-4">
+                <p className="text-2xl font-black text-indigo-700">{books.length}</p>
+                <p className="mt-1 text-xs font-bold text-indigo-500">Books</p>
+              </div>
+              <div className="rounded-2xl bg-purple-50 p-4">
+                <p className="text-2xl font-black text-purple-700">{categories.length}</p>
+                <p className="mt-1 text-xs font-bold text-purple-500">Genres</p>
+              </div>
+              <div className="rounded-2xl bg-blue-50 p-4">
+                <p className="text-2xl font-black text-blue-700">{available}</p>
+                <p className="mt-1 text-xs font-bold text-blue-500">Copies</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="grid gap-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-950/5 lg:grid-cols-[0.9fr_1.1fr] lg:p-8">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-indigo-700">Contact</p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950">Need help from the library team?</h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              Wixii ku saabsan login, borrow approval, buy orders, ama book returns, library team-ka si fudud ayaad ula xiriiri kartaa.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <a href="mailto:info@kaahlibrary.com" className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
+              <Mail size={22} />
+              <p className="mt-4 text-sm font-black">Email</p>
+              <p className="mt-1 text-xs font-semibold opacity-75">info@kaahlibrary.com</p>
+            </a>
+            <a href="tel:+252610000000" className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:border-indigo-600 hover:bg-indigo-600 hover:text-white">
+              <Phone size={22} />
+              <p className="mt-4 text-sm font-black">Phone</p>
+              <p className="mt-1 text-xs font-semibold opacity-75">+252 61 000 0000</p>
+            </a>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <MapPin size={22} className="text-indigo-600" />
+              <p className="mt-4 text-sm font-black text-slate-950">Location</p>
+              <p className="mt-1 text-xs font-semibold text-slate-500">Kaah Library Center</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       <Modal isOpen={Boolean(borrowBook)} onClose={() => setBorrowBook(null)} title="Request borrow approval" description={borrowBook?.title}>
