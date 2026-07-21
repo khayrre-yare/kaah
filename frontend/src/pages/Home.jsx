@@ -20,66 +20,72 @@ import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 
 const HERO_IMAGE_URL = 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=2400&q=90';
-const LIBRARY_GALLERY = [
+const LIBRARY_STORIES = [
   {
-    src: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=86',
-    alt: 'Quiet library reading tables',
-    className: 'md:col-span-2 md:row-span-2',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=900&q=86',
-    alt: 'Books arranged on shelves',
-    className: '',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=900&q=86',
+    id: 'reading-benefits',
+    title: 'Faaidada akhriska',
+    cover: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1200&q=86',
     alt: 'Open books on a study desk',
-    className: '',
+    excerpt: 'Akhrisku wuxuu kobciyaa fikirka, wuxuu ballaariyaa aqoonta, wuxuuna qofka ka caawiyaa inuu si qoto dheer u fahmo nolosha iyo bulshada.',
+    paragraphs: [
+      'Akhrisku waa mid ka mid ah waddooyinka ugu wanaagsan ee qofku ku kobcin karo aqoontiisa, fahamkiisa, iyo awooddiisa fikir. Qofka wax akhriya wuxuu helaa erayo cusub, aragtiyo cusub, iyo hab uu si wanaagsan ugu cabbiro waxa uu dareemayo ama uu doonayo inuu sharaxo.',
+      'Buuggu wuxuu qofka siiyaa waqti uu ku nasto, ku fakaro, kuna barto khibrado uusan weligiis si toos ah u arkin. Akhriska joogtada ah wuxuu xoojiyaa xusuusta, diiradda, iyo awoodda goaan qaadashada.',
+      'Maktabaddu waxay akhriska ka dhigtaa mid fudud oo qof walba heli karo. Marka buugaag kala duwan la helo, qofku wuxuu dooran karaa mowduucyo ku habboon xiisihiisa, waxbarashadiisa, ama shaqadiisa.',
+    ],
+    moreImages: [
+      'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=900&q=86',
+      'https://images.unsplash.com/photo-1463320726281-696a485928c7?auto=format&fit=crop&w=900&q=86',
+      'https://images.unsplash.com/photo-1526243741027-444d633d7365?auto=format&fit=crop&w=900&q=86',
+    ],
+    related: [
+      'Akhrisku wuxuu kordhiyaa ereyada iyo fahamka luqadda.',
+      'Wuxuu qofka ka caawiyaa inuu helo xasillooni iyo diirad saarid.',
+      'Wuxuu ardayda iyo dadka shaqeeya siinayaa aqoon joogto ah.',
+    ],
   },
   {
-    src: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=900&q=86',
-    alt: 'Stack of books and reading materials',
-    className: '',
+    id: 'library-community',
+    title: 'Kaalinta maktabaduhu ku leeyihiin bulshada',
+    cover: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=86',
+    alt: 'Quiet library reading tables',
+    excerpt: 'Maktabaddu waa xarun bulsho oo dadka u furta fursado waxbarasho, cilmi baaris, wadaag aqoon, iyo horumar joogto ah.',
+    paragraphs: [
+      'Maktabaduhu waxay bulshada u yihiin meel aqoon lagu kaydiyo, lagu helo, laguna wadaago. Waxay isku keenaan arday, macallimiin, cilmi baarayaal, iyo qof kasta oo doonaya inuu wax cusub barto.',
+      'Bulsho leh maktabad shaqaynaysa waxay helaysaa meel dadka lagu dhiirrigeliyo inay akhriyaan, wax bartaan, oo fikrado cusub soo saaraan. Taasi waxay kor u qaaddaa aqoonta guud iyo ka qaybgalka bulshada.',
+      'Maktabad casri ah ma aha oo keliya meel buug laga amaahdo. Waa adeeg bulshada ka caawiya helitaanka xog sax ah, isticmaalka technology-ga, iyo kobcinta dhaqanka akhriska.',
+    ],
+    moreImages: [
+      'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1000&q=86',
+      'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=86',
+      'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=86',
+    ],
+    related: [
+      'Maktabaddu waxay fududeysaa helitaanka buugaag iyo xog la isku halleyn karo.',
+      'Waxay dhalinyarada siisaa meel ay wax ku bartaan oo deggan.',
+      'Waxay bulshada ku abuurtaa dhaqan akhris iyo cilmi raadin.',
+    ],
   },
   {
-    src: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=86',
-    alt: 'Colorful books standing on a shelf',
-    className: '',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1100&q=86',
-    alt: 'Library shelves with many books',
-    className: 'md:col-span-2',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=900&q=86',
-    alt: 'Person reading a book in a library',
-    className: '',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1200&q=86',
-    alt: 'Tall library wall of books',
-    className: 'md:col-span-2 md:row-span-2',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=86',
-    alt: 'Students reading and studying together',
-    className: '',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1526243741027-444d633d7365?auto=format&fit=crop&w=900&q=86',
-    alt: 'Book pages close up',
-    className: '',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1200&q=86',
-    alt: 'Large library interior',
-    className: 'md:col-span-2',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1463320726281-696a485928c7?auto=format&fit=crop&w=900&q=86',
-    alt: 'Open book on a table',
-    className: '',
+    id: 'digital-library',
+    title: 'Maktabad casri ah iyo adeeg fudud',
+    cover: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=1200&q=86',
+    alt: 'Books arranged on shelves',
+    excerpt: 'Nidaam maktabadeed oo casri ah wuxuu fududeeyaa raadinta buugaagta, amaahda, iibka, maamulka stock-ga, iyo la socodka akhristaha.',
+    paragraphs: [
+      'Maktabad casri ah waxay isku xirtaa buugaagta, akhristayaasha, iyo maamulka si hawshu u noqoto mid sahlan. Qofku wuxuu si degdeg ah u arki karaa buugaagta la hayo, kuwa la amaahan karo, iyo kuwa uu iibsaday.',
+      'Marka nidaamku leeyahay approval workflow, maamulka wuxuu si cad u ogaanayaa codsiyada sugaya fasaxa. Taasi waxay yareysaa khaladaadka stock-ga waxayna ka dhigtaa adeegga mid la isku halleyn karo.',
+      'Adeegyada sida notification-ka, dashboard-ka user-ka, iyo contact message-ku waxay maktabadda ka dhigaan meel si dhab ah ula shaqeysa dadka isticmaala.',
+    ],
+    moreImages: [
+      'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=86',
+      'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=900&q=86',
+      'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=900&q=86',
+    ],
+    related: [
+      'Catalog online ah wuxuu fududeeyaa raadinta iyo kala saarista buugaagta.',
+      'Admin approvals waxay ilaalisaa stock-ga iyo nidaamka amaahda.',
+      'User dashboard wuxuu qofka tusaa buugaagtiisa iyo codsiyadiisa.',
+    ],
   },
 ];
 
@@ -103,6 +109,7 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [borrowBook, setBorrowBook] = useState(null);
+  const [activeStory, setActiveStory] = useState(null);
   const [returnDate, setReturnDate] = useState(defaultReturnDate());
   const [submitting, setSubmitting] = useState(false);
   const { user } = useAuth();
@@ -245,23 +252,31 @@ export default function Home() {
         )}
       </section>
 
-      <section className="border-y border-slate-200/80 bg-white px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid auto-rows-[13rem] gap-4 md:grid-cols-4 md:auto-rows-[16rem]">
-            {LIBRARY_GALLERY.map((image) => (
-              <figure
-                key={image.src}
-                className={`group relative overflow-hidden rounded-[1.25rem] border border-slate-200 bg-slate-100 shadow-lg shadow-slate-950/5 ${image.className}`}
+      <section className="bg-white px-4 py-14 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3">
+          {LIBRARY_STORIES.map((story) => (
+            <article key={story.id} className="min-w-0">
+              <button
+                type="button"
+                onClick={() => setActiveStory(story)}
+                className="group block w-full overflow-hidden rounded-[1.5rem] text-left focus-ring"
               >
                 <img
-                  src={image.src}
-                  alt={image.alt}
+                  src={story.cover}
+                  alt={story.alt}
                   loading="lazy"
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  className="h-72 w-full object-cover transition duration-500 group-hover:scale-105"
                 />
-              </figure>
-            ))}
-          </div>
+              </button>
+              <button type="button" onClick={() => setActiveStory(story)} className="mt-4 block text-left focus-ring">
+                <h3 className="text-xl font-black tracking-tight text-slate-950">{story.title}</h3>
+                <p className="mt-2 line-clamp-3 text-sm font-semibold leading-7 text-slate-600">{story.excerpt}</p>
+                <span className="mt-3 inline-flex text-sm font-black text-indigo-700 transition hover:text-purple-700">
+                  Akhri faahfaahinta
+                </span>
+              </button>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -325,6 +340,52 @@ export default function Home() {
           </div>
           <Button variant="accent" className="w-full" loading={submitting} onClick={submitBorrow}>Send request</Button>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(activeStory)}
+        onClose={() => setActiveStory(null)}
+        title={activeStory?.title}
+        size="xl"
+      >
+        {activeStory && (
+          <div className="space-y-7">
+            <img src={activeStory.cover} alt={activeStory.alt} className="h-72 w-full rounded-[1.5rem] object-cover" />
+
+            <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
+              <div className="space-y-4">
+                {activeStory.paragraphs.map((paragraph) => (
+                  <p key={paragraph} className="text-sm font-semibold leading-8 text-slate-600">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+
+              <div className="rounded-[1.5rem] bg-slate-50 p-5">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Qodobbo la xiriira</p>
+                <div className="mt-4 space-y-3">
+                  {activeStory.related.map((item) => (
+                    <p key={item} className="rounded-2xl bg-white p-3 text-sm font-bold leading-6 text-slate-700">
+                      {item}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              {activeStory.moreImages.map((image) => (
+                <img
+                  key={image}
+                  src={image}
+                  alt=""
+                  loading="lazy"
+                  className="h-44 w-full rounded-2xl object-cover"
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </Modal>
     </>
   );
