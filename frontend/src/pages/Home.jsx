@@ -6,6 +6,7 @@ import {
   CalendarDays,
   Sparkles,
   UsersRound,
+  X,
 } from 'lucide-react';
 import { booksApi, borrowsApi, categoriesApi } from '../api/client';
 import BookCard from '../components/BookCard';
@@ -33,9 +34,18 @@ const LIBRARY_STORIES = [
       'Maktabaddu waxay akhriska ka dhigtaa mid fudud oo qof walba heli karo. Marka buugaag kala duwan la helo, qofku wuxuu dooran karaa mowduucyo ku habboon xiisihiisa, waxbarashadiisa, ama shaqadiisa.',
     ],
     moreImages: [
-      'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=900&q=86',
-      'https://images.unsplash.com/photo-1463320726281-696a485928c7?auto=format&fit=crop&w=900&q=86',
-      'https://images.unsplash.com/photo-1526243741027-444d633d7365?auto=format&fit=crop&w=900&q=86',
+      {
+        src: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=900&q=86',
+        text: 'Akhris joogto ah wuxuu dhisaa caado aqoon raadis ah.',
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1463320726281-696a485928c7?auto=format&fit=crop&w=900&q=86',
+        text: 'Buug furan wuxuu qofka siin karaa aragti cusub maalin kasta.',
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1526243741027-444d633d7365?auto=format&fit=crop&w=900&q=86',
+        text: 'Bog kasta oo la akhriyo wuxuu kordhiyaa fahamka iyo erayada.',
+      },
     ],
     related: [
       'Akhrisku wuxuu kordhiyaa ereyada iyo fahamka luqadda.',
@@ -55,9 +65,18 @@ const LIBRARY_STORIES = [
       'Maktabad casri ah ma aha oo keliya meel buug laga amaahdo. Waa adeeg bulshada ka caawiya helitaanka xog sax ah, isticmaalka technology-ga, iyo kobcinta dhaqanka akhriska.',
     ],
     moreImages: [
-      'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1000&q=86',
-      'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=86',
-      'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=86',
+      {
+        src: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1000&q=86',
+        text: 'Shelf-yada buugaagtu waa kayd aqoon oo jiilal kala duwan ka faaidaystaan.',
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=86',
+        text: 'Maktabaddu waxay ardayda siisaa jawi wadajir wax loogu barto.',
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=86',
+        text: 'Goob akhris oo furan waxay bulshada u abuurtaa fursad isku mid ah.',
+      },
     ],
     related: [
       'Maktabaddu waxay fududeysaa helitaanka buugaag iyo xog la isku halleyn karo.',
@@ -77,9 +96,18 @@ const LIBRARY_STORIES = [
       'Adeegyada sida notification-ka, dashboard-ka user-ka, iyo contact message-ku waxay maktabadda ka dhigaan meel si dhab ah ula shaqeysa dadka isticmaala.',
     ],
     moreImages: [
-      'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=86',
-      'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=900&q=86',
-      'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=900&q=86',
+      {
+        src: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=900&q=86',
+        text: 'Catalog nidaamsan wuxuu fududeeyaa in buugga saxda ah la helo.',
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=900&q=86',
+        text: 'Buugaag si fiican loo habeeyay waxay adeegga ka dhigaan mid degdeg ah.',
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=900&q=86',
+        text: 'Nidaam casri ah wuxuu isku xiraa user-ka, admin-ka, iyo stock-ga.',
+      },
     ],
     related: [
       'Catalog online ah wuxuu fududeeyaa raadinta iyo kala saarista buugaagta.',
@@ -342,51 +370,62 @@ export default function Home() {
         </div>
       </Modal>
 
-      <Modal
-        isOpen={Boolean(activeStory)}
-        onClose={() => setActiveStory(null)}
-        title={activeStory?.title}
-        size="xl"
-      >
-        {activeStory && (
-          <div className="space-y-7">
-            <img src={activeStory.cover} alt={activeStory.alt} className="h-72 w-full rounded-[1.5rem] object-cover" />
+      {activeStory && (
+        <section className="fixed inset-0 z-50 overflow-y-auto bg-white">
+          <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
+            <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+              <p className="truncate pr-4 text-sm font-black uppercase tracking-[0.18em] text-indigo-700">{activeStory.title}</p>
+              <button onClick={() => setActiveStory(null)} className="focus-ring grid h-10 w-10 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-950" aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
+          </div>
 
-            <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
-              <div className="space-y-4">
-                {activeStory.paragraphs.map((paragraph) => (
-                  <p key={paragraph} className="text-sm font-semibold leading-8 text-slate-600">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+          <article className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <img src={activeStory.cover} alt={activeStory.alt} className="h-[42vh] min-h-80 w-full object-cover" />
 
-              <div className="rounded-[1.5rem] bg-slate-50 p-5">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Qodobbo la xiriira</p>
-                <div className="mt-4 space-y-3">
-                  {activeStory.related.map((item) => (
-                    <p key={item} className="rounded-2xl bg-white p-3 text-sm font-bold leading-6 text-slate-700">
-                      {item}
+            <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_22rem]">
+              <div>
+                <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">{activeStory.title}</h2>
+                <div className="mt-6 space-y-5">
+                  {activeStory.paragraphs.map((paragraph) => (
+                    <p key={paragraph} className="max-w-3xl text-base font-semibold leading-9 text-slate-600">
+                      {paragraph}
                     </p>
                   ))}
                 </div>
               </div>
+
+              <aside className="border-l border-slate-200 pl-6">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-700">Qodobbo la xiriira</p>
+                <div className="mt-4 space-y-4">
+                  {activeStory.related.map((item) => (
+                    <p key={item} className="text-sm font-bold leading-7 text-slate-700">
+                      {item}
+                    </p>
+                  ))}
+                </div>
+              </aside>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="mt-12 grid gap-8 md:grid-cols-3">
               {activeStory.moreImages.map((image) => (
-                <img
-                  key={image}
-                  src={image}
-                  alt=""
-                  loading="lazy"
-                  className="h-44 w-full rounded-2xl object-cover"
-                />
+                <figure key={image.src}>
+                  <img
+                    src={image.src}
+                    alt=""
+                    loading="lazy"
+                    className="h-56 w-full object-cover"
+                  />
+                  <figcaption className="mt-3 text-sm font-semibold leading-7 text-slate-600">
+                    {image.text}
+                  </figcaption>
+                </figure>
               ))}
             </div>
-          </div>
-        )}
-      </Modal>
+          </article>
+        </section>
+      )}
     </>
   );
 }
