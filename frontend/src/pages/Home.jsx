@@ -29,7 +29,7 @@ const LIBRARY_STORIES = [
     alt: 'Open books on a study desk',
     excerpt: 'Akhrisku wuxuu kobciyaa fikirka, wuxuu ballaariyaa aqoonta, wuxuuna qofka ka caawiyaa inuu si qoto dheer u fahmo nolosha iyo bulshada.',
     paragraphs: [
-      'Akhrisku waa mid ka mid ah waddooyinka ugu wanaagsan ee qofku ku kobcin karo aqoontiisa, fahamkiisa, iyo awooddiisa fikir. Qofka wax akhriya wuxuu helaa erayo cusub, aragtiyo cusub, iyo hab uu si wanaagsan ugu cabbiro waxa uu dareemayo ama uu doonayo inuu sharaxo.',
+      'Akhriska waa mid ka mid ah waddooyinka ugu wanaagsan ee qofku ku kobcin karo aqoontiisa, fahamkiisa, iyo awooddiisa fikir. Qofka wax akhriya wuxuu helaa erayo cusub, aragtiyo cusub, iyo hab uu si wanaagsan ugu cabbiro waxa uu dareemayo ama uu doonayo inuu sharaxo.',
       'Buuggu wuxuu qofka siiyaa waqti uu ku nasto, ku fakaro, kuna barto khibrado uusan weligiis si toos ah u arkin. Akhriska joogtada ah wuxuu xoojiyaa xusuusta, diiradda, iyo awoodda goaan qaadashada.',
       'Maktabaddu waxay akhriska ka dhigtaa mid fudud oo qof walba heli karo. Marka buugaag kala duwan la helo, qofku wuxuu dooran karaa mowduucyo ku habboon xiisihiisa, waxbarashadiisa, ama shaqadiisa.',
     ],
@@ -218,7 +218,7 @@ export default function Home() {
           <div className="max-w-4xl animate-fade-up">
             <Badge variant="dark" className="border-white/15 bg-white/10 text-white">
               <Sparkles size={13} />
-              Welcome to Kaah Library
+              Welcome to KaahLibrary
             </Badge>
 
             <h1 className="mt-6 text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl">
@@ -226,7 +226,7 @@ export default function Home() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-              Raadso buug, dir request amaah ama iibsi, kadib admin ayaa kuu fasaxaya.
+              Raadso buug, dir request amaah ama iibso, kadib admin ayaa kuu fasaxaya.
               Wax walba si cad ayay uga muuqanayaan dashboard-kaaga.
             </p>
 
